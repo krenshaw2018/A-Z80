@@ -2,11 +2,12 @@
 // 8-bit Load Group
 if (pla[17] && !pla[50]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -19,12 +20,14 @@ end
 
 if (pla[61] && !pla[58] && !pla[59]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_op1_oe=1; /* OP1 latch */ end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
@@ -32,11 +35,12 @@ end
 
 if (use_ixiy && pla[58]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -49,28 +53,30 @@ if (use_ixiy && pla[58]) begin
     if (M3 && T2) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
 end
 
 if (~use_ixiy && pla[58]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M2 && T2) begin  fMRead=1; end
     if (M2 && T3) begin  fMRead=1; nextM=1; setM1=1; end
-    if (M4 && T1) begin  fMRead=1; end
+    if (M4 && T1) begin  fMRead=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M4 && T2) begin  fMRead=1; end
     if (M4 && T3) begin  fMRead=1; nextM=1; setM1=1; end
 end
 
 if (use_ixiy && pla[59]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -83,12 +89,13 @@ if (use_ixiy && pla[59]) begin
     if (M3 && T2) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mWrite=1; ixy_d=1; /* Compute WZ=IX+d */ end
 end
 
 if (~use_ixiy && pla[59]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -98,7 +105,9 @@ if (~use_ixiy && pla[59]) begin
     if (M2 && T2) begin  fMWrite=1; end
     if (M2 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -107,7 +116,7 @@ if (~use_ixiy && pla[59]) begin
 end
 
 if (pla[40]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -115,7 +124,7 @@ if (pla[40]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1; end
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1; end
     if (M3 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ ixy_d=1; /* Compute WZ=IX+d */ end
@@ -125,11 +134,11 @@ if (pla[40]) begin
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  fMRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mWrite=1; ixy_d=1; /* Compute WZ=IX+d */ end
 end
 
 if (pla[50] && !pla[40]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -137,20 +146,22 @@ if (pla[50] && !pla[40]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1; end
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1; end
     if (M3 && T1) begin  fMWrite=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T2) begin  fMWrite=1; end
     if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
-    if (M4 && T1) begin  fMWrite=1; end
+    if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M4 && T2) begin  fMWrite=1; end
     if (M4 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
 end
 
 if (pla[8] && pla[13]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -166,11 +177,12 @@ end
 
 if (pla[8] && !pla[13]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit general purpose register, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -182,7 +194,7 @@ if (pla[8] && !pla[13]) begin
 end
 
 if (pla[38] && pla[13]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -190,8 +202,9 @@ if (pla[38] && pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -202,15 +215,18 @@ if (pla[38] && pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -223,11 +239,12 @@ end
 
 if (pla[38] && !pla[13]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -235,8 +252,9 @@ if (pla[38] && !pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -247,8 +265,9 @@ if (pla[38] && !pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -264,9 +283,8 @@ end
 
 if (pla[83]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
-                    ctl_sw_1d=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -278,11 +296,12 @@ if (pla[83]) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_IFF2;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -295,6 +314,7 @@ if (pla[83]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1;
                     ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4u=1; /* Read either I or R based on op3 (0 or 1) */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -312,6 +332,7 @@ end
 if (pla[57]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -323,7 +344,8 @@ if (pla[57]) begin
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1;
-                    ctl_reg_sys_we=1; ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4d=1; ctl_reg_in=2'b11; /* Write either I or R based on op3 (0 or 1) */
+                    ctl_reg_sys_we=1; ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4d=1; /* Write either I or R based on op3 (0 or 1) */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_op1_oe=1; /* OP1 latch */ end
@@ -333,12 +355,13 @@ end
 // 16-bit Load Group
 if (pla[7]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11; /* Write 8-bit GP register high byte */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Write 8-bit GP register high byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -346,11 +369,12 @@ if (pla[7]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1; end
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1; end
     if (M3 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11; /* Write 8-bit GP register low byte */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Write 8-bit GP register low byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -363,7 +387,7 @@ if (pla[7]) begin
 end
 
 if (pla[30] && pla[13]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -371,8 +395,9 @@ if (pla[30] && pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -383,15 +408,18 @@ if (pla[30] && pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -399,11 +427,13 @@ if (pla[30] && pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit WZ, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M4 && T3) begin  fMWrite=1; nextM=1;
+    if (M4 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -415,7 +445,7 @@ if (pla[30] && pla[13]) begin
 end
 
 if (pla[30] && !pla[13]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -423,8 +453,9 @@ if (pla[30] && !pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -435,8 +466,9 @@ if (pla[30] && !pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -447,8 +479,9 @@ if (pla[30] && !pla[13]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit WZ, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11; /* Write 8-bit GP register low byte */
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Write 8-bit GP register low byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -460,14 +493,15 @@ if (pla[30] && !pla[13]) begin
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T3) begin  fMRead=1; nextM=1; setM1=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11; /* Write 8-bit GP register high byte */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Write 8-bit GP register high byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
 end
 
 if (pla[31] && pla[33]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -475,8 +509,9 @@ if (pla[31] && pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -487,15 +522,18 @@ if (pla[31] && pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -504,11 +542,13 @@ if (pla[31] && pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit WZ, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M4 && T3) begin  fMWrite=1; nextM=1;
+    if (M4 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -521,7 +561,7 @@ if (pla[31] && pla[33]) begin
 end
 
 if (pla[31] && !pla[33]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -529,8 +569,9 @@ if (pla[31] && !pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -541,8 +582,9 @@ if (pla[31] && !pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+    if (M3 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -553,8 +595,9 @@ if (pla[31] && !pla[33]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit WZ, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11; /* Write 8-bit GP register low byte */
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Write 8-bit GP register low byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -567,7 +610,8 @@ if (pla[31] && !pla[33]) begin
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T3) begin  fMRead=1; nextM=1; setM1=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11; /* Write 8-bit GP register high byte */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Write 8-bit GP register high byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -585,40 +629,44 @@ if (pla[5]) begin
 end
 
 if (pla[23] && pla[16]) begin
-    if (M1 && T4) begin  validPLA=1;
+    if (M1 && T4) begin  validPLA=1; end
+    if (M1 && T5) begin  nextM=1; ctl_mWrite=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M1 && T5) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M2 && T1) begin  fMWrite=1;
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
     if (M2 && T2) begin  fMWrite=1;
-                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T3) begin  fMWrite=1; nextM=1;
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+    if (M2 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T1) begin  fMWrite=1;
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
-    if (M3 && T2) begin  fMWrite=1; end
+    if (M3 && T2) begin  fMWrite=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
 end
 
 if (pla[23] && !pla[16]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -626,8 +674,9 @@ if (pla[23] && !pla[16]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11; /* Write 8-bit GP register low byte */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Write 8-bit GP register low byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -639,7 +688,8 @@ if (pla[23] && !pla[16]) begin
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T3) begin  fMRead=1; nextM=1; setM1=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11; /* Write 8-bit GP register high byte */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Write 8-bit GP register high byte */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -665,7 +715,7 @@ if (pla[1]) begin
 end
 
 if (pla[10]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -673,8 +723,9 @@ if (pla[10]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -686,13 +737,20 @@ if (pla[10]) begin
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T3) begin  fMRead=1;
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M3 && T4) begin  nextM=1; end
+    if (M3 && T4) begin  nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -700,15 +758,22 @@ if (pla[10]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M4 && T3) begin  fMWrite=1; nextM=1;
+    if (M4 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
-    if (M5 && T2) begin  fMWrite=1; end
+    if (M5 && T2) begin  fMWrite=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T3) begin  fMWrite=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -734,11 +799,12 @@ if (pla[12]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_use_cf2=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -749,7 +815,7 @@ if (pla[12]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -757,7 +823,7 @@ if (pla[12]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit HL, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=op3; /* Decrement if op3 is set; increment otherwise */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -795,12 +861,12 @@ if (pla[12]) begin
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T3) begin  fMWrite=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit BC, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_repeat_we=1; /* Update repeating flag latch with BC=1 status */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T4) begin 
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit BC, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
+                    ctl_repeat_we=1; /* Update repeating flag latch with BC=1 status */ end
     if (M3 && T5) begin  nextM=1; setM1=nonRep | !repeat_en; end
     if (M4 && T1) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
@@ -838,12 +904,13 @@ if (pla[11]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_set=1;
                     ctl_flags_use_cf2=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -854,7 +921,7 @@ if (pla[11]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -895,12 +962,12 @@ if (pla[11]) begin
                     ctl_flags_use_cf2=1; end
     if (M3 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit BC, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_repeat_we=1; /* Update repeating flag latch with BC=1 status */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T4) begin 
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit BC, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
+                    ctl_repeat_we=1; /* Update repeating flag latch with BC=1 status */ end
     if (M3 && T5) begin  nextM=1; setM1=nonRep | !repeat_en | flags_zf; end
     if (M4 && T1) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
@@ -921,8 +988,8 @@ end
 
 // 8-bit Arithmetic and Logic Group
 if (pla[65] && !pla[52]) begin
-    if (M1 && T1) begin 
-                    ctl_reg_in=2'b11; /* 16-bit register to be written is decided elsewhere */
+    if (M1 && T1) begin  /* Which register to be written is decided elsewhere */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -932,13 +999,14 @@ if (pla[65] && !pla[52]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_state_alu=1; /* Assert the ALU PLA modifier to determine operation */
                     ctl_flags_hf_cpl=flags_nf; ctl_flags_cf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -951,6 +1019,7 @@ if (pla[65] && !pla[52]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -963,8 +1032,8 @@ if (pla[65] && !pla[52]) begin
 end
 
 if (pla[64]) begin
-    if (M1 && T1) begin 
-                    ctl_reg_in=2'b11; /* 16-bit register to be written is decided elsewhere */
+    if (M1 && T1) begin  /* Which register to be written is decided elsewhere */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -974,13 +1043,14 @@ if (pla[64]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_state_alu=1; /* Assert the ALU PLA modifier to determine operation */
                     ctl_flags_hf_cpl=flags_nf; ctl_flags_cf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -991,8 +1061,9 @@ if (pla[64]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1027,6 +1098,7 @@ end
 if (use_ixiy && pla[52]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1037,7 +1109,7 @@ if (use_ixiy && pla[52]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -1050,12 +1122,12 @@ if (use_ixiy && pla[52]) begin
     if (M3 && T2) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
 end
 
 if (!use_ixiy && pla[52]) begin
-    if (M1 && T1) begin 
-                    ctl_reg_in=2'b11; /* 16-bit register to be written is decided elsewhere */
+    if (M1 && T1) begin  /* Which register to be written is decided elsewhere */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1065,13 +1137,14 @@ if (!use_ixiy && pla[52]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_state_alu=1; /* Assert the ALU PLA modifier to determine operation */
                     ctl_flags_hf_cpl=flags_nf; ctl_flags_cf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1082,7 +1155,7 @@ if (!use_ixiy && pla[52]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -1102,9 +1175,11 @@ if (!use_ixiy && pla[52]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1; end
-    if (M4 && T1) begin  fMRead=1; end
+    if (M4 && T1) begin  fMRead=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M4 && T2) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1130,7 +1205,8 @@ end
 
 if (pla[66] && !pla[53]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1146,12 +1222,13 @@ if (pla[66] && !pla[53]) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
                     ctl_flags_use_cf2=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
-                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1165,6 +1242,7 @@ if (pla[66] && !pla[53]) begin
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
     if (op4 & op5 & !op3) ctl_bus_zero_oe=1;                /* Trying to read flags? Put 0 on the bus instead. */
     else begin ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; end /* Read 8-bit GP register */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1205,6 +1283,7 @@ end
 if (use_ixiy && pla[53]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1215,7 +1294,7 @@ if (use_ixiy && pla[53]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -1228,16 +1307,18 @@ if (use_ixiy && pla[53]) begin
     if (M3 && T2) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
 end
 
 if (!use_ixiy && pla[53]) begin
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1248,7 +1329,7 @@ if (!use_ixiy && pla[53]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -1267,13 +1348,11 @@ if (!use_ixiy && pla[53]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf_set=1; /* Set CF going into the ALU core */
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=0; end
-    if (M2 && T4) begin  nextM=1;
+    if (M2 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -1290,10 +1369,12 @@ if (!use_ixiy && pla[53]) begin
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
                     ctl_flags_use_cf2=1; end
-    if (M3 && T1) begin  fMWrite=1; end
+    if (M3 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T2) begin  fMWrite=1; end
     if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
-    if (M4 && T1) begin  fMRead=1; end
+    if (M4 && T1) begin  fMRead=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M4 && T2) begin  fMRead=1; end
     if (M4 && T3) begin  fMRead=1;
                     ctl_sw_2d=1;
@@ -1309,13 +1390,11 @@ if (!use_ixiy && pla[53]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf_set=1; /* Set CF going into the ALU core */
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=0; end
-    if (M4 && T4) begin  nextM=1;
+    if (M4 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -1332,7 +1411,8 @@ if (!use_ixiy && pla[53]) begin
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
                     ctl_flags_use_cf2=1; end
-    if (M5 && T1) begin  fMWrite=1; end
+    if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T2) begin  fMWrite=1; end
     if (M5 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
 end
@@ -1340,11 +1420,12 @@ end
 // 16-bit Arithmetic Group
 if (pla[69]) begin
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1357,11 +1438,13 @@ if (pla[69]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T1) begin 
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1374,11 +1457,11 @@ if (pla[69]) begin
     end else begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M2 && T2) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1393,11 +1476,13 @@ if (pla[69]) begin
                     ctl_flags_cf_we=1; end
     if (M2 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T4) begin  nextM=1;
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1408,13 +1493,13 @@ if (pla[69]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M3 && T1) begin 
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1435,11 +1520,12 @@ end
 
 if (op3 && pla[68]) begin
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1452,11 +1538,13 @@ if (op3 && pla[68]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T1) begin 
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1467,12 +1555,11 @@ if (op3 && pla[68]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M2 && T2) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1488,11 +1575,13 @@ if (op3 && pla[68]) begin
                     ctl_flags_cf_we=1; end
     if (M2 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T4) begin  nextM=1;
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1503,14 +1592,13 @@ if (op3 && pla[68]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M3 && T1) begin 
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1524,7 +1612,8 @@ if (op3 && pla[68]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
-                    ctl_flags_cf_we=1; end
+                    ctl_flags_cf_we=1;
+                    ctl_alu_zero_16bit=1; /* 16-bit arithmetic operation uses ZF calculated over 2 bytes */ end
     if (M3 && T2) begin 
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit HL, enable SW4 upstream */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
@@ -1533,12 +1622,13 @@ end
 
 if (!op3 && pla[68]) begin
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; ctl_flags_cf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1551,11 +1641,13 @@ if (!op3 && pla[68]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T1) begin 
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; /* Read 8-bit GP register low byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1568,12 +1660,11 @@ if (!op3 && pla[68]) begin
     end else begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M2 && T2) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1591,11 +1682,13 @@ if (!op3 && pla[68]) begin
                     ctl_flags_cf_we=1; end
     if (M2 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T4) begin  nextM=1;
                     ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; /* Read 8-bit GP register high byte */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -1606,14 +1699,13 @@ if (!op3 && pla[68]) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_reg_use_sp=1; /* For 16-bit loads: use SP instead of AF */ end
     if (M3 && T1) begin 
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1629,7 +1721,8 @@ if (!op3 && pla[68]) begin
                     ctl_flags_sz_we=1;
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
-                    ctl_flags_cf_we=1; end
+                    ctl_flags_cf_we=1;
+                    ctl_alu_zero_16bit=1; /* 16-bit arithmetic operation uses ZF calculated over 2 bytes */ end
     if (M3 && T2) begin 
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit HL, enable SW4 upstream */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
@@ -1652,7 +1745,8 @@ end
 // General Purpose Arithmetic and CPU Control Groups
 if (pla[77]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -1668,12 +1762,14 @@ if (pla[77]) begin
                     ctl_flags_cf_we=1;
                     ctl_alu_sel_op2_neg=flags_nf; ctl_flags_cf_cpl=!flags_nf; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_use_cf2=1;
                     ctl_flags_hf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1706,7 +1802,8 @@ end
 
 if (pla[81]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -1716,11 +1813,13 @@ if (pla[81]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_set=1;
                     ctl_alu_sel_op2_neg=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1744,7 +1843,8 @@ end
 
 if (pla[82]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -1762,11 +1862,13 @@ if (pla[82]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_set=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_hf_cpl=flags_nf; ctl_flags_cf_cpl=flags_nf; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1803,14 +1905,16 @@ if (pla[89]) begin
                     ctl_alu_sel_op2_high=1; /* Activate ALU operation on high nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
                     ctl_flags_xy_we=1;
-                    ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
-                    ctl_flags_cf_we=1; ctl_flags_cf_cpl=1; /* CCF */ end
+                    ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
+                    ctl_flags_cf_we=1; ctl_flags_cf_cpl=1; /* CCF */
                     ctl_flags_hf_cpl=!flags_cf; /* Used for CCF */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1840,11 +1944,13 @@ if (pla[92]) begin
                     ctl_flags_xy_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_cf_set=1; /* Set CF going into the ALU core */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1871,7 +1977,7 @@ if (pla[95]) begin
 end
 
 if (pla[97]) begin
-    if (M1 && T2) begin 
+    if (M1 && T3) begin 
                     ctl_iffx_bit=op3; ctl_iffx_we=1; /* DI/EI */ end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_no_ints=1; /* Disable interrupt generation for this opcode (DI/EI/CB/ED/DD/FD) */ end
@@ -1879,6 +1985,8 @@ end
 
 if (pla[96]) begin
     if (M1 && T3) begin 
+                    ctl_sw_1d=1;
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_im_we=1; /* IM n ('n' is read by opcode[4:3]) */ end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1; end
 end
@@ -1886,8 +1994,8 @@ end
 // Rotate and Shift Group
 if (pla[25]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -1898,12 +2006,13 @@ if (pla[25]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_use_cf2=1; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1916,6 +2025,7 @@ if (pla[25]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=1; ctl_shift_en=1; /* Shifter unit AND shift enable! */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1930,7 +2040,8 @@ end
 
 if (~use_ixiy && pla[70] && !pla[55]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; ctl_reg_in=2'b11; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -1944,12 +2055,13 @@ if (~use_ixiy && pla[70] && !pla[55]) begin
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf_we=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_use_cf2=1; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -1962,6 +2074,7 @@ if (~use_ixiy && pla[70] && !pla[55]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=1; ctl_shift_en=1; /* Shifter unit AND shift enable! */
@@ -1978,9 +2091,9 @@ if (~use_ixiy && pla[70] && !pla[55]) begin
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -1990,12 +2103,10 @@ if (~use_ixiy && pla[70] && !pla[55]) begin
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
-                    ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2016,12 +2127,13 @@ end
 
 if (~use_ixiy && pla[70] && pla[55]) begin
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */
                     ctl_flags_use_cf2=1; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2032,13 +2144,13 @@ if (~use_ixiy && pla[70] && pla[55]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M2 && T2) begin  fMRead=1; end
     if (M2 && T3) begin  fMRead=1; end
-    if (M2 && T4) begin  nextM=1;
+    if (M2 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2048,12 +2160,10 @@ if (~use_ixiy && pla[70] && pla[55]) begin
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
-                    ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=1; end
     if (M3 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2074,9 +2184,9 @@ if (~use_ixiy && pla[70] && pla[55]) begin
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2086,12 +2196,10 @@ if (~use_ixiy && pla[70] && pla[55]) begin
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
-                    ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2112,8 +2220,8 @@ end
 
 if (pla[15] && op3) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2124,11 +2232,12 @@ if (pla[15] && op3) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2139,7 +2248,7 @@ if (pla[15] && op3) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2155,7 +2264,7 @@ if (pla[15] && op3) begin
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_lq=1; /* Cross-bus wire (see schematic) */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */ end
-    if (M3 && T4) begin  nextM=1;
+    if (M3 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2163,6 +2272,7 @@ if (pla[15] && op3) begin
                     ctl_alu_op1_sel_low=1; /* Write low nibble with a high nibble */
                     ctl_alu_sel_op2_high=1; /* Activate ALU operation on high nibble */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2183,8 +2293,8 @@ end
 
 if (pla[15] && !op3) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2195,11 +2305,12 @@ if (pla[15] && !op3) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2210,7 +2321,7 @@ if (pla[15] && !op3) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2235,10 +2346,11 @@ if (pla[15] && !op3) begin
                     ctl_alu_op2_oe=1; /* OP2 latch */ end
     if (M3 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_lq=1; /* Cross-bus wire (see schematic) */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */ end
-    if (M3 && T4) begin  nextM=1;
+    if (M3 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2246,6 +2358,7 @@ if (pla[15] && !op3) begin
                     ctl_alu_op1_sel_low=1; /* Write low nibble with a high nibble */
                     ctl_alu_sel_op2_high=1; /* Activate ALU operation on high nibble */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2277,11 +2390,13 @@ if (~use_ixiy && pla[72] && !pla[55]) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2294,6 +2409,7 @@ if (~use_ixiy && pla[72] && !pla[55]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -2305,11 +2421,12 @@ if (~use_ixiy && pla[72] && !pla[55]) begin
                     ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M4 && T1) begin  fMRead=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
     if (M4 && T3) begin  fMRead=1; end
     if (M4 && T4) begin  nextM=1; setM1=1;
@@ -2338,11 +2455,13 @@ if (~use_ixiy && pla[72] && pla[55]) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2353,12 +2472,16 @@ if (~use_ixiy && pla[72] && pla[55]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M2 && T2) begin  fMRead=1; end
-    if (M2 && T3) begin  fMRead=1; end
+    if (M2 && T3) begin  fMRead=1;
+                    ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_flags_bus=1; /* Load FLAGT from the data bus */
+                    ctl_flags_xy_we=1; end
     if (M2 && T4) begin  nextM=1; setM1=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
@@ -2369,7 +2492,6 @@ if (~use_ixiy && pla[72] && pla[55]) begin
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1;
                     ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M4 && T1) begin  fMRead=1;
@@ -2379,7 +2501,7 @@ if (~use_ixiy && pla[72] && pla[55]) begin
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
     if (M4 && T3) begin  fMRead=1; end
     if (M4 && T4) begin  nextM=1; setM1=1;
@@ -2398,7 +2520,8 @@ end
 
 if (~use_ixiy && pla[74] && !pla[55]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; ctl_reg_in=2'b11; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2406,6 +2529,8 @@ if (~use_ixiy && pla[74] && !pla[55]) begin
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2418,6 +2543,7 @@ if (~use_ixiy && pla[74] && !pla[55]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
@@ -2430,9 +2556,9 @@ if (~use_ixiy && pla[74] && !pla[55]) begin
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2442,6 +2568,7 @@ if (~use_ixiy && pla[74] && !pla[55]) begin
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2456,6 +2583,8 @@ end
 if (~use_ixiy && pla[74] && pla[55]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2466,7 +2595,7 @@ if (~use_ixiy && pla[74] && pla[55]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2479,7 +2608,7 @@ if (~use_ixiy && pla[74] && pla[55]) begin
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
-    if (M2 && T4) begin  nextM=1;
+    if (M2 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2487,7 +2616,8 @@ if (~use_ixiy && pla[74] && pla[55]) begin
                     ctl_alu_res_oe=1; /* Result latch */
                     ctl_alu_sel_op2_high=1; /* Activate ALU operation on high nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
-    if (M3 && T1) begin  fMWrite=1; end
+    if (M3 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T2) begin  fMWrite=1; end
     if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
     if (M4 && T1) begin  fMRead=1;
@@ -2497,9 +2627,9 @@ if (~use_ixiy && pla[74] && pla[55]) begin
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2509,6 +2639,7 @@ if (~use_ixiy && pla[74] && pla[55]) begin
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2522,7 +2653,8 @@ end
 
 if (~use_ixiy && pla[73] && !pla[55]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; ctl_reg_in=2'b11; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; /* Write 8-bit GP register selected by op[2:0] */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2530,6 +2662,8 @@ if (~use_ixiy && pla[73] && !pla[55]) begin
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_alu_sel_op2_neg=1; end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2542,6 +2676,7 @@ if (~use_ixiy && pla[73] && !pla[55]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
                     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};/* Read 8-bit GP register selected by op[2:0] */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
@@ -2554,9 +2689,9 @@ if (~use_ixiy && pla[73] && !pla[55]) begin
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2566,6 +2701,7 @@ if (~use_ixiy && pla[73] && !pla[55]) begin
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_alu_sel_op2_neg=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2580,6 +2716,8 @@ end
 if (~use_ixiy && pla[73] && pla[55]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2590,7 +2728,7 @@ if (~use_ixiy && pla[73] && pla[55]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2603,7 +2741,7 @@ if (~use_ixiy && pla[73] && pla[55]) begin
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_alu_sel_op2_neg=1; end
-    if (M2 && T4) begin  nextM=1;
+    if (M2 && T4) begin  nextM=1; ctl_mWrite=1;
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2611,7 +2749,8 @@ if (~use_ixiy && pla[73] && pla[55]) begin
                     ctl_alu_res_oe=1; /* Result latch */
                     ctl_alu_sel_op2_high=1; /* Activate ALU operation on high nibble */
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_alu_sel_op2_neg=1; end
-    if (M3 && T1) begin  fMWrite=1; end
+    if (M3 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M3 && T2) begin  fMWrite=1; end
     if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=1; end
     if (M4 && T1) begin  fMRead=1;
@@ -2621,9 +2760,9 @@ if (~use_ixiy && pla[73] && pla[55]) begin
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
     if (M4 && T2) begin  fMRead=1; end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2633,6 +2772,7 @@ if (~use_ixiy && pla[73] && pla[55]) begin
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_alu_sel_op2_neg=1; end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */
@@ -2647,11 +2787,12 @@ end
 // Input and Output Groups
 if (pla[37] && !pla[28]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2659,11 +2800,11 @@ if (pla[37] && !pla[28]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1; end
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_iorw=1; end
     if (M3 && T1) begin  fIORead=1;
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_sw_4d=1; /* Read 8-bit general purpose A register, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_in=2'b11; /* 16-bit register to be written is decided elsewhere */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ /* Which register to be written is decided elsewhere */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M3 && T2) begin  fIORead=1; end
@@ -2673,7 +2814,8 @@ end
 
 if (pla[27] && !pla[34]) begin
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; /* Write 8-bit GP register */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; /* Write 8-bit GP register */
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -2686,11 +2828,12 @@ if (pla[27] && !pla[34]) begin
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-                    ctl_sw_2u=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2701,7 +2844,7 @@ if (pla[27] && !pla[34]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_iorw=1; end
     if (M2 && T1) begin  fIORead=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit BC, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2724,7 +2867,7 @@ if (pla[27] && !pla[34]) begin
 end
 
 if (pla[37] && pla[28]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2732,14 +2875,16 @@ if (pla[37] && pla[28]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_iorw=1;
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_sw_4d=1; /* Read 8-bit general purpose A register, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_in=2'b11; /* 16-bit register to be written is decided elsewhere */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M3 && T1) begin  fIOWrite=1;
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -2749,9 +2894,10 @@ if (pla[37] && pla[28]) begin
 end
 
 if (pla[27] && pla[34]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_iorw=1;
     if (op4 & op5 & !op3) ctl_bus_zero_oe=1;                /* Trying to read flags? Put 0 on the bus instead. */
     else begin ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; end /* Read 8-bit GP register */
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
@@ -2771,10 +2917,12 @@ if (pla[91] && pla[21]) begin
                     ctl_alu_core_R=1; ctl_alu_core_V=0; ctl_alu_core_S=0; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2786,12 +2934,13 @@ if (pla[91] && pla[21]) begin
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; end
-    if (M1 && T5) begin  nextM=1; end
+    if (M1 && T5) begin  nextM=1; ctl_iorw=1; end
     if (M2 && T1) begin  fIORead=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit BC, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M2 && T2) begin  fIORead=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -2804,12 +2953,11 @@ if (pla[91] && pla[21]) begin
     end else begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_alu_sel_op2_neg=1; end
     if (M2 && T3) begin  fIORead=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2823,14 +2971,16 @@ if (pla[91] && pla[21]) begin
     end
                     ctl_flags_sz_we=1;
                     ctl_flags_xy_we=1;
+                    ctl_flags_cf_we=1;
                     ctl_alu_sel_op2_neg=1; end
-    if (M2 && T4) begin  fIORead=1; nextM=1;
+    if (M2 && T4) begin  fIORead=1; nextM=1; ctl_mWrite=1;
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
+                    ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_flags_nf_we=1; /* Sign bit, to be used with FLAGT source set to "bus" */
+                    ctl_flags_nf_we=1; /* Sign bit, to be used with FLAGT source set to "alu" */
                     ctl_alu_sel_op2_neg=1; end
     if (M3 && T1) begin  fMWrite=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1; /* Read 16-bit HL, enable SW4 downstream */
@@ -2872,10 +3022,12 @@ if (pla[91] && pla[20]) begin
                     ctl_alu_core_R=1; ctl_alu_core_V=0; ctl_alu_core_S=0; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P; end
     if (M1 && T2) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_oe=1; /* Enable FLAGT onto the data bus */ end
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -2888,6 +3040,7 @@ if (pla[91] && pla[20]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -2900,12 +3053,11 @@ if (pla[91] && pla[20]) begin
     end else begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_sz_we=1;
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_alu_sel_op2_neg=1; end
-    if (M1 && T5) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+    if (M1 && T5) begin  nextM=1; ctl_mRead=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -2927,8 +3079,9 @@ if (pla[91] && pla[20]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b11; ctl_sw_4u=1; /* Write 16-bit HL, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=op3; /* Decrement if op3 is set; increment otherwise */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_iorw=1;
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
@@ -2951,7 +3104,7 @@ if (pla[91] && pla[20]) begin
         ctl_alu_core_hf=1;
     end
                     ctl_flags_hf_we=1;
-                    ctl_flags_nf_we=1; /* Sign bit, to be used with FLAGT source set to "bus" */ end
+                    ctl_flags_nf_we=1; /* Sign bit, to be used with FLAGT source set to "alu" */ end
     if (M3 && T3) begin  fIOWrite=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -2967,6 +3120,7 @@ if (pla[91] && pla[20]) begin
                     ctl_flags_cf_we=1; end
     if (M3 && T4) begin  fIOWrite=1; nextM=1; setM1=nonRep | !repeat_en | flags_zf;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op_low=1; /* Activate ALU operation on low nibble */
                     ctl_alu_core_R=1; ctl_alu_core_V=0; ctl_alu_core_S=0; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1; end
@@ -2991,7 +3145,7 @@ end
 
 // Jump Group
 if (pla[29]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -2999,8 +3153,9 @@ if (pla[29]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3014,7 +3169,8 @@ if (pla[29]) begin
     if (M3 && T3) begin  fMRead=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -3024,6 +3180,7 @@ end
 if (pla[43]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3034,7 +3191,7 @@ if (pla[43]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3042,8 +3199,9 @@ if (pla[43]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3059,7 +3217,8 @@ if (pla[43]) begin
         ctl_reg_not_pc=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1;
     end
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Conditionally selecting strictly W */
+                    ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; /* Conditionally selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3068,6 +3227,7 @@ end
 if (pla[47]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3078,7 +3238,7 @@ if (pla[47]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3097,6 +3257,7 @@ if (pla[47]) begin
                     ctl_flags_sz_we=1; end
     if (M3 && T2) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -3111,7 +3272,8 @@ if (pla[47]) begin
     end
                     ctl_flags_hf_we=1; end
     if (M3 && T3) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -3127,6 +3289,7 @@ if (pla[47]) begin
                     ctl_flags_cf_we=1; end
     if (M3 && T4) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -3142,7 +3305,8 @@ if (pla[47]) begin
     if (M3 && T5) begin  nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -3159,6 +3323,7 @@ end
 if (pla[48]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3168,9 +3333,9 @@ if (pla[48]) begin
                     ctl_flags_hf_we=1;
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
-                    ctl_flags_cf_we=1;
+                    ctl_flags_cf_we=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1;
                     ctl_cond_short=1; /* M1/T3 only: force a short flags condition (SS) */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3189,6 +3354,7 @@ if (pla[48]) begin
                     ctl_flags_sz_we=1; end
     if (M3 && T2) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -3203,7 +3369,8 @@ if (pla[48]) begin
     end
                     ctl_flags_hf_we=1; end
     if (M3 && T3) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -3219,6 +3386,7 @@ if (pla[48]) begin
                     ctl_flags_cf_we=1; end
     if (M3 && T4) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -3234,7 +3402,8 @@ if (pla[48]) begin
     if (M3 && T5) begin  nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -3258,6 +3427,7 @@ end
 if (pla[26]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3270,6 +3440,7 @@ if (pla[26]) begin
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1;
                     ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -3285,8 +3456,9 @@ if (pla[26]) begin
     end
                     ctl_flags_hf_we=1;
                     ctl_alu_sel_op2_neg=1; end
-    if (M1 && T5) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+    if (M1 && T5) begin  nextM=1; ctl_mRead=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -3318,6 +3490,7 @@ if (pla[26]) begin
                     ctl_flags_sz_we=1; end
     if (M3 && T2) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -3332,7 +3505,8 @@ if (pla[26]) begin
     end
                     ctl_flags_hf_we=1; end
     if (M3 && T3) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -3348,6 +3522,7 @@ if (pla[26]) begin
                     ctl_flags_cf_we=1; end
     if (M3 && T4) begin 
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -3363,7 +3538,8 @@ if (pla[26]) begin
     if (M3 && T5) begin  nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -3379,55 +3555,65 @@ end
 
 // Call and Return Group
 if (pla[24]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
+    if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T1) begin  fMRead=1;
+    if (M2 && T2) begin  fMRead=1;
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T2) begin  fMRead=1;
-                    ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M3 && T1) begin  fMRead=1;
+                    ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
+    if (M3 && T2) begin  fMRead=1;
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T2) begin  fMRead=1;
-                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T3) begin  fMRead=1;
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M3 && T4) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+    if (M3 && T4) begin  nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
     if (M4 && T2) begin  fMWrite=1;
-                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M4 && T3) begin  fMWrite=1; nextM=1;
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+    if (M4 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
-    if (M5 && T2) begin  fMWrite=1; end
+    if (M5 && T2) begin  fMWrite=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T3) begin  fMWrite=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
@@ -3437,6 +3623,7 @@ end
 if (pla[42]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3447,57 +3634,65 @@ if (pla[42]) begin
                     ctl_flags_pf_we=1;
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
-    if (M1 && T4) begin  validPLA=1; nextM=1;
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
+    if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T1) begin  fMRead=1;
+    if (M2 && T2) begin  fMRead=1;
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T2) begin  fMRead=1;
-                    ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M3 && T1) begin  fMRead=1;
+                    ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
+    if (M3 && T2) begin  fMRead=1;
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M3 && T2) begin  fMRead=1;
-                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T3) begin  fMRead=1; nextM=!flags_cond_true; setM1=!flags_cond_true;
-                    ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Conditionally selecting strictly W */
+                    ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; /* Conditionally selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
-    if (M3 && T4) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+    if (M3 && T4) begin  nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M4 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
     if (M4 && T2) begin  fMWrite=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+    if (M4 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M4 && T3) begin  fMWrite=1; nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
-                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
     if (M5 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
-    if (M5 && T2) begin  fMWrite=1; end
+    if (M5 && T2) begin  fMWrite=1;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
     if (M5 && T3) begin  fMWrite=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
@@ -3505,7 +3700,7 @@ if (pla[42]) begin
 end
 
 if (pla[35]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3513,8 +3708,9 @@ if (pla[35]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3528,7 +3724,8 @@ if (pla[35]) begin
     if (M3 && T3) begin  fMRead=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -3538,6 +3735,7 @@ end
 if (pla[45]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3549,7 +3747,7 @@ if (pla[45]) begin
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1; end
     if (M1 && T4) begin  validPLA=1; end
-    if (M1 && T5) begin  nextM=1; setM1=!flags_cond_true; end
+    if (M1 && T5) begin  nextM=1; ctl_mRead=1; setM1=!flags_cond_true; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3557,8 +3755,9 @@ if (pla[45]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3572,7 +3771,8 @@ if (pla[45]) begin
     if (M3 && T3) begin  fMRead=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -3580,8 +3780,8 @@ if (pla[45]) begin
 end
 
 if (pla[46]) begin
-    if (M1 && T4) begin  validPLA=1; nextM=1;
-                    ctl_iff1_iff2=1; /* RETN copies IFF2 into IFF1 (restores it) */ end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1;
+                    ctl_iff1_iff2=1; /* RETN copies IFF2 into IFF1 */ end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3589,8 +3789,9 @@ if (pla[46]) begin
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
@@ -3604,7 +3805,8 @@ if (pla[46]) begin
     if (M3 && T3) begin  fMRead=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -3613,7 +3815,8 @@ end
 
 if (pla[56]) begin
     if (M1 && T3) begin 
-                    ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_reg_in=2'b11;
+                    ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_op1_oe=1; /* OP1 latch */
@@ -3621,36 +3824,45 @@ if (pla[56]) begin
                     ctl_sw_mask543_en=!((in_intr & im2) | in_nmi);
                     ctl_sw_1d=!in_nmi; ctl_66_oe=in_nmi;
                     ctl_bus_ff_oe=in_intr & im1; end
-    if (M1 && T4) begin  validPLA=1;
+    if (M1 && T4) begin  validPLA=1; end
+    if (M1 && T5) begin  nextM=1; ctl_mWrite=1;
                     ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M1 && T5) begin  nextM=1;
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */
+                    ctl_sw_2d=1;
+                    ctl_sw_1d=1;
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
+                    ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
+                    ctl_alu_op1_sel_bus=1; /* Internal bus */ end
     if (M2 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
+                    ctl_reg_out_hi=1; /* From the register file into the ALU high byte only */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
     if (M2 && T2) begin  fMWrite=1;
-                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
-                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
-    if (M2 && T3) begin  fMWrite=1; nextM=1;
                     ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
                     ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
-                    ctl_bus_inc_oe=1; ctl_al_we=1; /* Loop back the incrementer into the latch (flop) */ end
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+    if (M2 && T3) begin  fMWrite=1; nextM=1; ctl_mWrite=1;
+                    ctl_reg_use_sp=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_sw_4d=1;/* Read 16-bit SP, enable SW4 downstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
     if (M3 && T1) begin  fMWrite=1;
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_apin_mux=1; /* Apin sourced from incrementer */
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
+                    ctl_reg_out_lo=1; /* From the register file into the ALU low byte only */
                     ctl_sw_2u=1;
                     ctl_sw_1u=1;
                     ctl_bus_db_we=1; /* Write DB pads with internal data bus value */ end
     if (M3 && T2) begin  fMWrite=1;
-                    ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1; /* Selecting strictly Z */
-                    ctl_sw_2d=1;
-                    ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
-                    ctl_alu_op1_sel_bus=1; /* Internal bus */ end
-    if (M3 && T3) begin  fMWrite=1; nextM=1; setM1=!(in_intr & im2); /* RST interrupt extension */
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11; ctl_reg_use_sp=1; ctl_sw_4u=1; /* Write 16-bit SP, enable SW4 upstream */
+                    ctl_inc_cy=pc_inc; ctl_inc_dec=1; /* Decrement */
+                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+    if (M3 && T3) begin  fMWrite=1; nextM=1; ctl_mRead=in_intr & im2; /* RST38 interrupt extension */ setM1=!(in_intr & im2); /* RST38 interrupt extension */
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
                     ctl_reg_not_pc=1; /* For M1/T1 load from a register other than PC */ end
@@ -3658,7 +3870,7 @@ if (pla[56]) begin
     if (M4 && T1) begin  fMRead=1;
                     ctl_reg_sel_ir=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4d=1; /* Select 8-bit I register */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_in=2'b01; /* Pass only low 8-bit value into the register file */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_op1_oe=1; /* OP1 latch */ end
@@ -3666,19 +3878,20 @@ if (pla[56]) begin
                     ctl_sw_4u=1;
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
-                    ctl_reg_out_lo=1; /* Pass only low 8-bit value out of the register file */
+                    ctl_reg_out_lo=1; /* From the register file into the ALU low byte only */
                     ctl_sw_2d=1;
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */ end
-    if (M4 && T3) begin  fMRead=1; nextM=1;
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+    if (M4 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1;
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */ end
     if (M5 && T1) begin  fMRead=1;
                     ctl_reg_sel_ir=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4d=1; /* Select 8-bit I register */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_in=2'b01; /* Pass only low 8-bit value into the register file */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_op1_oe=1; /* OP1 latch */ end
@@ -3688,7 +3901,8 @@ if (pla[56]) begin
     if (M5 && T3) begin  fMRead=1; nextM=1; setM1=1;
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_sw_2d=1;
                     ctl_sw_1d=1;
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
@@ -3699,6 +3913,7 @@ end
 if (pla[49]) begin
     if (M1 && T3) begin 
                     ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_bus=1; /* Load FLAGT from the data bus */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
@@ -3710,7 +3925,7 @@ if (pla[49]) begin
                     ctl_flags_nf_we=1; /* Previous NF, to be used when loading FLAGT */
                     ctl_flags_cf_we=1;
                     ctl_state_tbl_cb_set=1; setCBED=1; /* CB-table prefix */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; ctl_mRead=1; end
     if (M2 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ end
@@ -3718,7 +3933,7 @@ if (pla[49]) begin
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
-    if (M2 && T3) begin  fMRead=1; nextM=1; end
+    if (M2 && T3) begin  fMRead=1; nextM=1; ctl_mRead=1; end
     if (M3 && T1) begin  fMRead=1;
                     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit PC */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */ ixy_d=1; /* Compute WZ=IX+d */ end
@@ -3728,13 +3943,13 @@ if (pla[49]) begin
                     ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T3) begin  fMRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
     if (M3 && T4) begin  ixy_d=1; /* Compute WZ=IX+d */ end
-    if (M3 && T5) begin  nextM=1; ixy_d=1; /* Compute WZ=IX+d */ end
+    if (M3 && T5) begin  nextM=1; ctl_mRead=1; ixy_d=1; /* Compute WZ=IX+d */ end
     if (M4 && T1) begin 
                     ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_alu_bs_oe=1; /* Bit-selector unit */
                     ctl_alu_op2_sel_bus=1; /* Internal bus */
                     ctl_alu_op1_sel_bus=1; /* Internal bus */
-                    ctl_ir_we=T1up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
+                    ctl_ir_we=1; end
 // Loading a new instruction immediately changes PLA wires and continues into the new effective instructions' M4/T1 cycle
 end
 
@@ -3742,7 +3957,8 @@ end
 if (pla[3]) begin
     if (M1 && T2) begin 
                     ctl_state_ixiy_we=1; ctl_state_iy_set=op5; setIXIY=1; /* IX/IY prefix */ end
-    if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1; end
+    if (M1 && T4) begin  validPLA=1; nextM=1; setM1=1;
+                    ctl_no_ints=1; /* Disable interrupt generation for this opcode (DI/EI/CB/ED/DD/FD) */ end
 end
 
 if (pla[44]) begin
@@ -3784,7 +4000,8 @@ if (pla[78]) begin
     end
                     ctl_flags_nf_we=1; ctl_flags_nf_set=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V; end
 end
@@ -3800,7 +4017,8 @@ if (pla[79]) begin
     end
                     ctl_flags_nf_we=1; ctl_flags_nf_set=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V; end
 end
@@ -3814,7 +4032,8 @@ if (pla[80]) begin
     end
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V; end
 end
@@ -3830,7 +4049,8 @@ if (pla[84]) begin
     end
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V; end
 end
@@ -3840,7 +4060,8 @@ if (pla[85]) begin
                     ctl_alu_core_R=0; ctl_alu_core_V=0; ctl_alu_core_S=1; ctl_flags_cf_set=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P; end
     if (M1 && T2) begin 
@@ -3852,7 +4073,8 @@ if (pla[86]) begin
                     ctl_alu_core_R=1; ctl_alu_core_V=1; ctl_alu_core_S=1; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P; end
     if (M1 && T2) begin 
@@ -3864,7 +4086,8 @@ if (pla[88]) begin
                     ctl_alu_core_R=1; ctl_alu_core_V=0; ctl_alu_core_S=0; ctl_flags_cf_set=1; ctl_flags_cf_cpl=1;
                     ctl_flags_nf_we=1; ctl_flags_nf_clr=1; end
     if (M1 && T1) begin 
-                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
+                    ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_in_hi=1; ctl_reg_in_lo=1; /* From the ALU side into the register file */
                     ctl_flags_xy_we=1;
                     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_P; end
     if (M1 && T2) begin 
@@ -3883,6 +4106,7 @@ if (ixy_d) begin
                     ctl_flags_sz_we=1; end
     if (T2) begin 
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b01;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_sw_2d=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
@@ -3895,10 +4119,10 @@ if (ixy_d) begin
     end else begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1; end
     if (T3) begin 
-                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; /* Selecting strictly Z */
+                    ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; /* Selecting only Z */
+                    ctl_reg_in_lo=1; /* From the ALU side into the register file low byte only */
                     ctl_sw_2u=1;
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
@@ -3909,10 +4133,10 @@ if (ixy_d) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_xy_we=1;
                     ctl_flags_cf2_we=1; ctl_flags_cf2_sel=0; end
     if (T4) begin 
                     ctl_reg_gp_sel=`GP_REG_HL; ctl_reg_gp_hilo=2'b10;
+                    ctl_reg_out_hi=1; ctl_reg_out_lo=1; /* From the register file into the ALU */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_shift_oe=!ctl_alu_bs_oe; /* Shifter unit without shift-enable */
                     ctl_alu_op2_sel_zero=1; /* Zero */
@@ -3923,14 +4147,14 @@ if (ixy_d) begin
     if (!ctl_alu_op_low) begin
         ctl_alu_core_hf=1;
     end
-                    ctl_flags_xy_we=1;
                     ctl_flags_hf_we=1;
                     ctl_flags_use_cf2=1;
                     ctl_alu_sel_op2_neg=flags_sf; end
     if (T5) begin 
                     ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4d=1; /* Select 16-bit WZ */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
-                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; /* Selecting strictly W */
+                    ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; /* Selecting only W */
+                    ctl_reg_in_hi=1; /* From the ALU side into the register file high byte only */
                     ctl_flags_alu=1; /* Load FLAGT from the ALU */
                     ctl_alu_oe=1; /* Enable ALU onto the data bus */
                     ctl_alu_res_oe=1; /* Result latch */
@@ -3950,20 +4174,21 @@ if (M1) begin
     if (M1 && T1) begin 
                     ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_halt | in_intr | in_nmi); /* Write 16-bit PC and control incrementer */
                     ctl_inc_cy=pc_inc; /* Increment */
-                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */ end
+                    ctl_bus_inc_oe=1; ctl_apin_mux2=1; /* Apin sourced from AL */ end
     if (M1 && T2) begin 
                     ctl_reg_sel_ir=1; ctl_reg_sys_hilo=2'b11; /* Select 16-bit IR */
                     ctl_al_we=1; /* Write a value from the register bus to the address latch */
+                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
                     ctl_state_ixiy_we=1; ctl_state_ixiy_clr=!setIXIY; /* Clear IX/IY flag */
-                    ctl_state_tbl_clr=!setCBED; /* Clear CB/ED prefix */ end
+                    ctl_state_tbl_clr=!setCBED; /* Clear CB/ED prefix */
+                    ctl_ir_we=1;
+                    ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi; end
     if (M1 && T3) begin 
                     ctl_reg_sys_we=1; ctl_reg_sel_ir=1; ctl_reg_sys_hilo=2'b11; /* Write 16-bit IR */
                     ctl_inc_cy=pc_inc; /* Increment */
-                    ctl_bus_inc_oe=1; /* Output enable incrementer to the register bus */
-                    ctl_bus_db_oe=1; /* Read DB pads to internal data bus */
-                    ctl_ir_we=T3up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi;
-                    ctl_eval_cond=1; /* Evaluate flags condition based on the opcode[5:3] */ end
-    if (M1 && T4) begin 
+                    ctl_bus_inc_oe=1; ctl_apin_mux2=1; /* Apin sourced from AL */
                     ctl_inc_limit6=1; /* Limit the incrementer to 6 bits */ end
+    if (M1 && T4) begin 
+                    ctl_eval_cond=1; /* Evaluate flags condition based on the opcode[5:3] */ end
 end
 

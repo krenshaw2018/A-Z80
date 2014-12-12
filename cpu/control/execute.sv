@@ -1,11 +1,22 @@
-//============================================================================
-// Module execute in control/decode Z80 CPU
-//
-// Copyright 2014 Goran Devic
-//
+//=============================================================================
 // This module implements the instruction execute state logic.
-//============================================================================
-
+//
+//  Copyright (C) 2014  Goran Devic
+//
+//  This program is free software; you can redistribute it and/or modify it
+//  under the terms of the GNU General Public License as published by the Free
+//  Software Foundation; either version 2 of the License, or (at your option)
+//  any later version.
+//
+//  This program is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+//  more details.
+//
+//  You should have received a copy of the GNU General Public License along
+//  with this program; if not, write to the Free Software Foundation, Inc.,
+//  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+//=============================================================================
 module execute
 (
     //----------------------------------------------------------
@@ -30,7 +41,7 @@ module execute
     // Inputs from various blocks
     //----------------------------------------------------------
     input wire fpga_reset,              // Internal fpga test mode
-    input wire reset,                   // Internal reset signal
+    input wire nreset,                  // Internal reset signal
     input wire clk,                     // Internal clock signal
     input wire in_intr,                 // Servicing maskable interrupt
     input wire in_nmi,                  // Servicing non-maskable interrupt
@@ -59,9 +70,7 @@ module execute
     input wire T3,                      // T-cycle #3
     input wire T4,                      // T-cycle #4
     input wire T5,                      // T-cycle #5
-    input wire T6,                      // T-cycle #6
-    input wire T1up,                    // T1 clock up phase
-    input wire T3up                     // T3 clock up phase
+    input wire T6                       // T-cycle #6
 );
 
 // Detects unknown instructions by signalling the known ones
@@ -88,6 +97,7 @@ logic pc_inc;                           // Normally defaults to 1
 `define PFSEL_V         2'h1
 `define PFSEL_IFF2      2'h2
 `define PFSEL_REP       2'h3
+
 //----------------------------------------------------------
 // Make available different sections of the opcode byte
 //----------------------------------------------------------
@@ -120,10 +130,10 @@ assign rsel0 = op0 ^ (op1 & op2);
 
 always_comb
 begin
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // Default assignment of all control outputs to 0 to prevent generating
     // latches.
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     `include "exec_zero.i"
 
     // Reset internal control wires
@@ -140,43 +150,39 @@ begin
     nonRep = 0;
     pc_inc = 1;
 
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // State-based signal assignment
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     `include "exec_matrix.i"
 
     // List more specific combinational signal assignments after the include
-    //------------------------------------------------------------------------
-    // Reset control: Set PC and IR to 0 in two clocks (phases)
-    //------------------------------------------------------------------------
-    // Suppress clear in test mode: helps fuse tests to set registers
-    if (reset && !fpga_reset) begin
+    //-------------------------------------------------------------------------
+    // Reset control
+    //-------------------------------------------------------------------------
+    if (!nreset) begin
         // Clear the address latch, PC and IR registers
         ctl_inc_zero = 1;               // Force 0 to the output of incrementer
-        ctl_bus_inc_oe = 1;             // Incrementer to the abus
+        ctl_inc_cy = 0;                 // Don't increment, pass-through
         ctl_al_we = 1;                  // Write 0 to the address latch
-        ctl_reg_sel_pc = 1;             // Write to the PC
-        ctl_reg_sel_ir = 1;             // Write to the IR
-        ctl_reg_sys_we = 1;             // Perform write
-        ctl_reg_sys_hilo = 2'b11;       // 16-bit width & write
+        setM1 = 1;                      // Arm to start executing at M1/T1
+        nextM = 1;                      // Arm to start executing at M1/T1
 
         // Clear instruction opcode register
         ctl_bus_zero_oe = 1;            // Output 0 on the data bus section 0
-        ctl_ir_we = ~clk;               // And write it into the instruction register
+        ctl_ir_we = 1;                  // And write it into the instruction register
     end
 
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // At M1/T4 advance an instruction if it did not trigger any PLA entry
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     if (M1 && T4 && !validPLA) begin
         nextM = 1;                      // Complete the default M1 cycle
         setM1 = 1;                      // Set next M1 cycle
     end
 
-    //------------------------------------------------------------------------
-    // The last cycle of an instruction is also the first cycle of the next
-    // instruction because of the PC => Address Latch overlap
-    //------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    // The last cycle of an instruction is also the first cycle of the next one
+    //-------------------------------------------------------------------------
     if (setM1) begin
         ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11;   // Select 16-bit PC
         ctl_al_we=1;                    // Write the PC into the address latch

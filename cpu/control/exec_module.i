@@ -5,7 +5,6 @@ output logic ctl_state_iy_set,
 output logic ctl_state_ixiy_clr,
 output logic ctl_state_ixiy_we,
 output logic ctl_state_halt_set,
-output logic ctl_state_halt_clr,
 output logic ctl_state_tbl_clr,
 output logic ctl_state_tbl_ed_set,
 output logic ctl_state_tbl_cb_set,
@@ -21,6 +20,11 @@ output logic ctl_no_ints,
 
 // Module: control/ir.v
 output logic ctl_ir_we,
+
+// Module: control/memory_ifc.v
+output logic ctl_mRead,
+output logic ctl_mWrite,
+output logic ctl_iorw,
 
 // Module: alu/alu_control.v
 output logic ctl_shift_en,
@@ -69,11 +73,16 @@ output logic ctl_flags_hf_cpl,
 output logic ctl_flags_use_cf2,
 output logic ctl_flags_hf2_we,
 output logic ctl_flags_nf_clr,
+output logic ctl_alu_zero_16bit,
 output logic [1:0] ctl_flags_cf2_sel,
 
 // Module: registers/reg_file.v
 output logic ctl_sw_4d,
 output logic ctl_sw_4u,
+output logic ctl_reg_in_hi,
+output logic ctl_reg_in_lo,
+output logic ctl_reg_out_lo,
+output logic ctl_reg_out_hi,
 
 // Module: registers/reg_control.v
 output logic ctl_reg_exx,
@@ -88,10 +97,8 @@ output logic ctl_reg_not_pc,
 output logic ctl_reg_sys_we_lo,
 output logic ctl_reg_sys_we_hi,
 output logic ctl_reg_sys_we,
-output logic ctl_reg_out_lo,
 output logic [1:0] ctl_reg_gp_hilo,
 output logic [1:0] ctl_reg_gp_sel,
-output logic [1:0] ctl_reg_in,
 output logic [1:0] ctl_reg_sys_hilo,
 
 // Module: bus/address_latch.v
@@ -101,6 +108,8 @@ output logic ctl_inc_zero,
 output logic ctl_al_we,
 output logic ctl_inc_limit6,
 output logic ctl_bus_inc_oe,
+output logic ctl_apin_mux,
+output logic ctl_apin_mux2,
 
 // Module: bus/bus_control.v
 output logic ctl_bus_ff_oe,

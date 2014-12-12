@@ -4,7 +4,7 @@ editor if you plan to continue editing the block that represents it in
 the Block Editor! File corruption is VERY likely to occur.
 */
 /*
-Copyright (C) 1991-2011 Altera Corporation
+Copyright (C) 1991-2013 Altera Corporation
 Your use of Altera Corporation's design tools, logic functions 
 and other software and tools, and its AMPP partner logic 
 functions, and any output files from any of the foregoing 
@@ -138,29 +138,29 @@ applicable agreement for further details.
 	(port
 		(pt 0 288)
 		(input)
-		(text "reg_in_lo" (rect 0 0 51 14)(font "Arial" (font_size 8)))
-		(text "reg_in_lo" (rect 21 283 72 297)(font "Arial" (font_size 8)))
+		(text "ctl_reg_in_hi" (rect 0 0 71 14)(font "Arial" (font_size 8)))
+		(text "ctl_reg_in_hi" (rect 21 283 92 297)(font "Arial" (font_size 8)))
 		(line (pt 0 288)(pt 16 288))
 	)
 	(port
 		(pt 0 304)
 		(input)
-		(text "reg_in_hi" (rect 0 0 51 14)(font "Arial" (font_size 8)))
-		(text "reg_in_hi" (rect 21 299 72 313)(font "Arial" (font_size 8)))
+		(text "ctl_reg_in_lo" (rect 0 0 71 14)(font "Arial" (font_size 8)))
+		(text "ctl_reg_in_lo" (rect 21 299 92 313)(font "Arial" (font_size 8)))
 		(line (pt 0 304)(pt 16 304))
 	)
 	(port
 		(pt 0 320)
 		(input)
-		(text "reg_out_lo" (rect 0 0 60 14)(font "Arial" (font_size 8)))
-		(text "reg_out_lo" (rect 21 315 81 329)(font "Arial" (font_size 8)))
+		(text "ctl_reg_out_lo" (rect 0 0 80 14)(font "Arial" (font_size 8)))
+		(text "ctl_reg_out_lo" (rect 21 315 101 329)(font "Arial" (font_size 8)))
 		(line (pt 0 320)(pt 16 320))
 	)
 	(port
 		(pt 0 336)
 		(input)
-		(text "reg_out_hi" (rect 0 0 60 14)(font "Arial" (font_size 8)))
-		(text "reg_out_hi" (rect 21 331 81 345)(font "Arial" (font_size 8)))
+		(text "ctl_reg_out_hi" (rect 0 0 80 14)(font "Arial" (font_size 8)))
+		(text "ctl_reg_out_hi" (rect 21 331 101 345)(font "Arial" (font_size 8)))
 		(line (pt 0 336)(pt 16 336))
 	)
 	(port
@@ -194,8 +194,8 @@ applicable agreement for further details.
 	(port
 		(pt 0 416)
 		(input)
-		(text "nclk" (rect 0 0 22 14)(font "Arial" (font_size 8)))
-		(text "nclk" (rect 21 411 43 425)(font "Arial" (font_size 8)))
+		(text "clk" (rect 0 0 15 14)(font "Arial" (font_size 8)))
+		(text "clk" (rect 21 411 36 425)(font "Arial" (font_size 8)))
 		(line (pt 0 416)(pt 16 416))
 	)
 	(port

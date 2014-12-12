@@ -2,37 +2,43 @@
          A conceptual implementation of the Z80 CPU
          ------------------------------------------
 
-This project is described in more details here: http://www.devic.us/hacks
+This project is described in more details at: www.baltazarstudios.com
 
 Prerequisites:
 * Altera Quartus and Modelsim (free web editions)
 * Python 2.7
 
 A-Z80 "cpu" consists of several functional blocks and a top-level module:
-alu         contains ALU block, ALU control and flags logic
-bus         contains data bus switches, pin logic, address latch and incrementer
-register    contains CPU register file and register control logic
-control     contains PLA, sequencer and other control blocks
-toplevel    integrates all sub-modules into a top-level design
+  alu         contains ALU block, ALU control and flags logic
+  bus         contains data bus switches, pin logic, address latch and the
+              address incrementer
+  register    contains CPU register file and the register control logic
+  control     contains PLA, the sequencer and other control blocks
+  toplevel    A-Z80 top level core, interfaces and the test code
+  
+"host" integrates the A-Z80 into several complete top-level designs:
+  "basic" contains a simplified board consisting of A-Z80 CPU, memory
+          and UART modules that can run small Z80 programs
+  "zxspectrum" contains an implementation of the Sinclair ZX Spectrum
 
-"host" contains a simplified board containing A-Z80 CPU, memory and UART modules
-which, when run, print "Hello, World!" through the UART.
-
+  You probably want to start by loading one of those two designs in Quartus.
+  
 "tools" contains various tools related to the project.
 
-Read the 'readme.txt' files in each folder for additional information.
+Read the 'readme.txt' files in each of the folders for additional information.
 
-Logic Design
-============
+A-Z80 Logic Design
+==================
 Each functional block contains a Quartus project file:
 ./<block>/test_<block>.qpf
 
 Quartus projects are only used as containers for files within individual
-modules; the top-level designs are in the "toplevel" and "host" folders. In fact,
-you can just look into 'host' for the final FPGA build and ModelSim project.
+modules; complete top-level solutions that use A-Z80 are in the "host" folder.
 
 Majority of sub-modules are designed in the Quartus schematic editor and then
-exported to Verilog for simulation and the top-level integration.
+exported to Verilog for simulation and the top-level integration. If you decide
+to create a design using the A-Z80, you can use schematic files as sources (for
+Altera Quartus), or compiled Verilog code (for Xilinx, for example).
 
 Simulation
 ==========
@@ -48,7 +54,7 @@ profile: ./<block>/simulation/modelsim/test_<block>.mpf
 The first time you open any ModelSim session by opening a *.mpf file, you need to
 create a library:
 ModelSim> vlib work
-Only then you can compile all modules/project sources (Compile->Compile All) and
+After that you can compile all modules/project sources (Compile->Compile All) and
 run a simulation.
 
 If you get a message "Unable to compile", you forgot to run 'modelsim_setup.py'.
@@ -56,11 +62,29 @@ Exit ModelSim; git revert its changes to ".mpf" file (since it has already rewri
 it using absolute paths); delete "work" folder, run 'modelsim_setup.py' and restart.
 You will have to recreate library ('vlib work') and recompile.
 
-Each project also contains a set of predefined waveform scripts which you can
+Each project also contains a set of predefined waveform scripts that you can
 load before running a simulation of a particular module or a test:
 ./<block>/simulation/modelsim/wave_<test>.do
 
-----------------------------------------------------------------------------------
 Email me if you have any questions,
 Goran Devic
 gdevic@yahoo.com
+
+----------------------------------------------------------------------------------
+This complete project and each file therein is covered under the GNU GPL2.0 license.
+It basically states that anyone is free to use it and distribute it, but the full
+source needs to be available under the same terms:
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation; either version 2 of the License, or (at your option)
+    any later version.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+    more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.

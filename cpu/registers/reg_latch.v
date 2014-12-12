@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,20 +13,20 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Sat Sep 20 19:47:08 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Fri Nov 07 10:28:37 2014"
 
 module reg_latch(
 	we,
 	oe,
-	nclk,
+	clk,
 	db
 );
 
 
 input wire	we;
 input wire	oe;
-input wire	nclk;
+input wire	clk;
 inout wire	[7:0] db;
 
 reg	[7:0] latch;
@@ -44,7 +44,7 @@ assign	db[1] = oe ? latch[1] : 1'bz;
 assign	db[0] = oe ? latch[0] : 1'bz;
 
 
-always@(posedge nclk)
+always@(posedge clk)
 begin
 if (we)
 	begin

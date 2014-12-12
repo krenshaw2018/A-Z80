@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,17 +13,16 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Wed Sep 24 00:22:17 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Fri Oct 31 21:08:42 2014"
 
 module alu_mux_3z(
 	sel_zero,
 	sel_a,
 	sel_b,
-	nclk,
 	a,
 	b,
-	ena_out,
+	ena,
 	Q
 );
 
@@ -31,17 +30,15 @@ module alu_mux_3z(
 input wire	sel_zero;
 input wire	sel_a;
 input wire	sel_b;
-input wire	nclk;
 input wire	[3:0] a;
 input wire	[3:0] b;
-output wire	ena_out;
+output wire	ena;
 output wire	[3:0] Q;
 
 wire	[3:0] SYNTHESIZED_WIRE_0;
 wire	SYNTHESIZED_WIRE_1;
 wire	[3:0] SYNTHESIZED_WIRE_2;
 wire	[3:0] SYNTHESIZED_WIRE_3;
-wire	SYNTHESIZED_WIRE_4;
 
 
 
@@ -54,11 +51,9 @@ assign	SYNTHESIZED_WIRE_1 =  ~sel_zero;
 
 assign	SYNTHESIZED_WIRE_0 = SYNTHESIZED_WIRE_2 | SYNTHESIZED_WIRE_3;
 
-assign	ena_out = SYNTHESIZED_WIRE_4 & nclk;
+assign	ena = sel_a | sel_b | sel_zero;
 
 assign	SYNTHESIZED_WIRE_2 = b & {sel_b,sel_b,sel_b,sel_b};
-
-assign	SYNTHESIZED_WIRE_4 = sel_b | sel_zero | sel_a;
 
 
 endmodule

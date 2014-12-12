@@ -20,33 +20,67 @@ initial begin : init
     z.nRESET <= `CLR;
 end : init
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Testbench for interrupt testing
+// Enable one or more interrupt generators and run them with the
+// 'hello world' code
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // Infuse a NMI at a certain clock
 initial begin : nmi_once
-    repeat (100) @(posedge clk);
+    repeat (500) @(posedge clk);
 //    z.nNMI <= `SET;
     repeat (1) @(posedge clk);
     z.nNMI <= `CLR;
 end : nmi_once
 
-// Test sending a periodic NMI
+// Test sending a *periodic* NMI
 always begin : nmi_rep
-//    #5000 z.nNMI <= `SET;
-    #2    z.nNMI <= `CLR;
+    repeat (3000) @(posedge clk);
+//    z.nNMI <= `SET;
+    repeat (1) @(posedge clk);
+    z.nNMI <= `CLR;
 end : nmi_rep
 
 // Infuse an INT at a certain clock
 initial begin : int_once
-    repeat (500) @(posedge clk);
+    repeat (1000) @(posedge clk);
 //    z.nINT <= `SET;
-    repeat (23) @(posedge clk);
+    repeat (300) @(posedge clk);
     z.nINT <= `CLR;
 end : int_once
 
-// Test sending a periodic INT
+// Test sending a *periodic* INT
 always begin : int_rep
-//    #10000 z.nINT <= `SET;
-    #23   z.nINT <= `CLR;
+    repeat (5000) @(posedge clk);
+//    z.nINT <= `SET;
+    repeat (300) @(posedge clk);
+    z.nINT <= `CLR;
 end : int_rep
+
+// Test WAIT.. inject at will
+initial begin : wait_once
+    repeat (1008) @(posedge clk);
+//    z.nWAIT <= `SET;
+    repeat (2) @(posedge clk);
+    z.nWAIT <= `CLR;
+end : wait_once
+
+// Test BUSRQ / BUSACK
+initial begin : busrq_once
+    repeat (10) @(posedge clk);
+//    z.nBUSRQ <= `SET;
+    repeat (10) @(posedge clk);
+    z.nBUSRQ <= `CLR;
+end : busrq_once
+
+// Test special RESET
+initial begin : spc_reset
+    repeat (40) @(posedge clk);
+//    z.nRESET <= `SET;
+    repeat (1) @(posedge clk);
+    z.nRESET <= `CLR;
+end : spc_reset
 
 endmodule
 
@@ -58,7 +92,7 @@ initial forever #1 clk = ~clk;
 
 // Stop after printing "Hello, World!"
 initial begin : stopme
-    #5000 $stop();
+    #70000 $stop();
 end : stopme
 
 z80_if z80(clk);            // Instantiate the Z80 bus interface

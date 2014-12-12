@@ -7,6 +7,21 @@
 #
 # Input timing file is exported from the Excel file as a TAB-delimited text file.
 #
+#  Copyright (C) 2014  Goran Devic
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the Free
+#  Software Foundation; either version 2 of the License, or (at your option)
+#  any later version.
+#
+#  This program is distributed in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+#  more details.
+#
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import string
 import sys
 import csv
@@ -122,14 +137,12 @@ for line in content:
     # "#0"..        common timings using M and T cycles (M being optional)
     # "#always"     timing that does not depend on M and T cycles (ex. ALU operations)
     if col_clean[0].startswith('#0') or col_clean[0].startswith('#always'):
-        curM = col[1]
-        curT = col[2]
         # M and T states are hard-coded in the table at the index 1 and 2
         if col_clean[0].startswith('#0'):
             if col[1]=='?':     # M is optional, use '?' to skip it
-                state = "    if (T{0}) begin ".format(curT)
+                state = "    if (T{0}) begin ".format(col[2])
             else:
-                state = "    if (M{0} && T{1}) begin ".format(curM, curT)
+                state = "    if (M{0} && T{1}) begin ".format(col[1], col[2])
         else:
             state = "    begin "
 
@@ -145,9 +158,6 @@ for line in content:
                     macro = getSubst(tkeys[i], token)
                     if macro.strip().startswith("ctl_"):
                         action += ctl_prefix
-                    # Additionally, do a current M and T clock number replacement
-                    macro = macro.replace("{T?}", format(curT))
-                    macro = macro.replace("{M?}", format(curM))
                     action += macro
                     if state.find("ERROR")>=0:
                         print "{0} {1}".format(state, action)

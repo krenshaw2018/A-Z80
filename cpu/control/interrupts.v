@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,11 +13,10 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Sun Sep 07 21:21:41 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Sun Nov 09 09:11:22 2014"
 
 module interrupts(
-	reset,
 	ctl_iff1_iff2,
 	nmi,
 	setM1,
@@ -27,6 +26,7 @@ module interrupts(
 	ctl_im_we,
 	clk,
 	ctl_no_ints,
+	nreset,
 	db,
 	iff1,
 	iff2,
@@ -37,7 +37,6 @@ module interrupts(
 );
 
 
-input wire	reset;
 input wire	ctl_iff1_iff2;
 input wire	nmi;
 input wire	setM1;
@@ -47,6 +46,7 @@ input wire	ctl_iffx_bit;
 input wire	ctl_im_we;
 input wire	clk;
 input wire	ctl_no_ints;
+input wire	nreset;
 input wire	[1:0] db;
 output wire	iff1;
 output wire	iff2;
@@ -60,108 +60,85 @@ wire	in_intr_ALTERA_SYNTHESIZED;
 reg	in_nmi_ALTERA_SYNTHESIZED;
 reg	int_armed;
 reg	nmi_armed;
-wire	nreset;
 wire	test1;
 wire	SYNTHESIZED_WIRE_0;
+reg	DFFE_instIFF2;
 wire	SYNTHESIZED_WIRE_1;
 wire	SYNTHESIZED_WIRE_2;
-reg	DFFE_inst44;
 wire	SYNTHESIZED_WIRE_3;
 wire	SYNTHESIZED_WIRE_4;
 wire	SYNTHESIZED_WIRE_5;
-wire	SYNTHESIZED_WIRE_6;
+reg	DFFE_inst44;
+wire	SYNTHESIZED_WIRE_21;
 wire	SYNTHESIZED_WIRE_7;
 wire	SYNTHESIZED_WIRE_8;
 wire	SYNTHESIZED_WIRE_9;
 wire	SYNTHESIZED_WIRE_10;
 wire	SYNTHESIZED_WIRE_11;
 wire	SYNTHESIZED_WIRE_12;
-wire	SYNTHESIZED_WIRE_28;
+wire	SYNTHESIZED_WIRE_13;
 wire	SYNTHESIZED_WIRE_14;
-reg	SYNTHESIZED_WIRE_15;
+wire	SYNTHESIZED_WIRE_15;
 wire	SYNTHESIZED_WIRE_16;
 wire	SYNTHESIZED_WIRE_17;
 wire	SYNTHESIZED_WIRE_19;
-wire	SYNTHESIZED_WIRE_29;
-wire	SYNTHESIZED_WIRE_21;
-wire	SYNTHESIZED_WIRE_30;
-wire	SYNTHESIZED_WIRE_23;
-wire	SYNTHESIZED_WIRE_25;
-wire	SYNTHESIZED_WIRE_27;
+wire	SYNTHESIZED_WIRE_20;
 
-assign	iff2 = SYNTHESIZED_WIRE_15;
-assign	SYNTHESIZED_WIRE_5 = 1;
-assign	SYNTHESIZED_WIRE_6 = 1;
-assign	SYNTHESIZED_WIRE_7 = 1;
-assign	SYNTHESIZED_WIRE_8 = 1;
-assign	SYNTHESIZED_WIRE_11 = 1;
-assign	SYNTHESIZED_WIRE_17 = 1;
-assign	SYNTHESIZED_WIRE_19 = 1;
-assign	SYNTHESIZED_WIRE_23 = 1;
-assign	SYNTHESIZED_WIRE_27 = 1;
+assign	iff2 = DFFE_instIFF2;
+assign	SYNTHESIZED_WIRE_10 = 1;
 
 
 
-assign	SYNTHESIZED_WIRE_16 = ctl_iffx_we | ctl_iff1_iff2;
+assign	SYNTHESIZED_WIRE_2 = ctl_iffx_bit & SYNTHESIZED_WIRE_0;
 
-assign	SYNTHESIZED_WIRE_30 = ctl_im_we & SYNTHESIZED_WIRE_0;
+assign	SYNTHESIZED_WIRE_1 = ctl_iff1_iff2 & DFFE_instIFF2;
 
-assign	SYNTHESIZED_WIRE_29 =  ~reset;
+assign	SYNTHESIZED_WIRE_16 = SYNTHESIZED_WIRE_1 | SYNTHESIZED_WIRE_2;
 
-assign	SYNTHESIZED_WIRE_1 =  ~db[0];
+assign	SYNTHESIZED_WIRE_17 = ctl_iffx_we | ctl_iff1_iff2;
 
-assign	SYNTHESIZED_WIRE_9 = ~(in_intr_ALTERA_SYNTHESIZED | reset);
+assign	SYNTHESIZED_WIRE_21 = SYNTHESIZED_WIRE_3 & nreset;
 
-assign	SYNTHESIZED_WIRE_2 =  ~in_nmi_ALTERA_SYNTHESIZED;
+assign	SYNTHESIZED_WIRE_0 =  ~ctl_iff1_iff2;
 
-assign	SYNTHESIZED_WIRE_25 = db[1] & db[0];
+assign	SYNTHESIZED_WIRE_4 =  ~db[0];
 
-assign	SYNTHESIZED_WIRE_21 = db[1] & SYNTHESIZED_WIRE_1;
+assign	SYNTHESIZED_WIRE_5 =  ~in_nmi_ALTERA_SYNTHESIZED;
 
+assign	SYNTHESIZED_WIRE_20 = db[1] & db[0];
 
-
-
-assign	in_intr_ALTERA_SYNTHESIZED = SYNTHESIZED_WIRE_2 & DFFE_inst44;
-
-assign	SYNTHESIZED_WIRE_10 = iff_ALTERA_SYNTHESIZED1 & intr;
+assign	SYNTHESIZED_WIRE_19 = db[1] & SYNTHESIZED_WIRE_4;
 
 
+assign	in_intr_ALTERA_SYNTHESIZED = SYNTHESIZED_WIRE_5 & DFFE_inst44;
 
-assign	test1 = setM1 & SYNTHESIZED_WIRE_3;
+assign	SYNTHESIZED_WIRE_15 = SYNTHESIZED_WIRE_21 & SYNTHESIZED_WIRE_7;
+
+assign	SYNTHESIZED_WIRE_13 = iff_ALTERA_SYNTHESIZED1 & intr;
+
+assign	test1 = setM1 & SYNTHESIZED_WIRE_8;
 
 
-
-always@(posedge nmi or negedge SYNTHESIZED_WIRE_4 or negedge SYNTHESIZED_WIRE_6)
+always@(posedge nmi or negedge SYNTHESIZED_WIRE_9)
 begin
-if (!SYNTHESIZED_WIRE_4)
+if (!SYNTHESIZED_WIRE_9)
 	begin
 	nmi_armed <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_6)
 	begin
-	nmi_armed <= 1;
-	end
-else
-	begin
-	nmi_armed <= SYNTHESIZED_WIRE_5;
+	nmi_armed <= SYNTHESIZED_WIRE_10;
 	end
 end
 
-assign	SYNTHESIZED_WIRE_0 =  ~clk;
+assign	SYNTHESIZED_WIRE_12 = SYNTHESIZED_WIRE_11 & nreset;
 
 
-
-always@(posedge clk or negedge nreset or negedge SYNTHESIZED_WIRE_7)
+always@(posedge clk or negedge nreset)
 begin
 if (!nreset)
 	begin
 	in_nmi_ALTERA_SYNTHESIZED <= 0;
-	end
-else
-if (!SYNTHESIZED_WIRE_7)
-	begin
-	in_nmi_ALTERA_SYNTHESIZED <= 1;
 	end
 else
 if (test1)
@@ -171,16 +148,11 @@ if (test1)
 end
 
 
-always@(posedge clk or negedge nreset or negedge SYNTHESIZED_WIRE_8)
+always@(posedge clk or negedge nreset)
 begin
 if (!nreset)
 	begin
 	DFFE_inst44 <= 0;
-	end
-else
-if (!SYNTHESIZED_WIRE_8)
-	begin
-	DFFE_inst44 <= 1;
 	end
 else
 if (test1)
@@ -190,80 +162,85 @@ if (test1)
 end
 
 
-assign	nreset =  ~reset;
-
-
-always@(posedge clk or negedge SYNTHESIZED_WIRE_9 or negedge SYNTHESIZED_WIRE_11)
+always@(posedge clk or negedge SYNTHESIZED_WIRE_12)
 begin
-if (!SYNTHESIZED_WIRE_9)
+if (!SYNTHESIZED_WIRE_12)
 	begin
 	int_armed <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_11)
 	begin
-	int_armed <= 1;
+	int_armed <= SYNTHESIZED_WIRE_13;
+	end
+end
+
+assign	SYNTHESIZED_WIRE_9 = SYNTHESIZED_WIRE_14 & nreset;
+
+assign	SYNTHESIZED_WIRE_8 =  ~ctl_no_ints;
+
+
+always@(posedge clk or negedge SYNTHESIZED_WIRE_15)
+begin
+if (!SYNTHESIZED_WIRE_15)
+	begin
+	iff_ALTERA_SYNTHESIZED1 <= 0;
 	end
 else
+if (SYNTHESIZED_WIRE_17)
 	begin
-	int_armed <= SYNTHESIZED_WIRE_10;
+	iff_ALTERA_SYNTHESIZED1 <= SYNTHESIZED_WIRE_16;
 	end
 end
 
-assign	SYNTHESIZED_WIRE_28 = ~(reset | in_intr_ALTERA_SYNTHESIZED);
 
-assign	SYNTHESIZED_WIRE_14 = ~(in_nmi_ALTERA_SYNTHESIZED | SYNTHESIZED_WIRE_12);
-
-assign	SYNTHESIZED_WIRE_3 =  ~ctl_no_ints;
-
-assign	SYNTHESIZED_WIRE_12 =  ~SYNTHESIZED_WIRE_28;
-
-assign	SYNTHESIZED_WIRE_4 = ~(in_nmi_ALTERA_SYNTHESIZED | reset);
-
-
-always@(SYNTHESIZED_WIRE_14 or SYNTHESIZED_WIRE_17 or SYNTHESIZED_WIRE_16 or SYNTHESIZED_WIRE_15)
+always@(posedge clk or negedge SYNTHESIZED_WIRE_21)
 begin
-if (~SYNTHESIZED_WIRE_14)
-		iff_ALTERA_SYNTHESIZED1 <= 1'b0;
-else if (~SYNTHESIZED_WIRE_17)
-		iff_ALTERA_SYNTHESIZED1 <= 1'b1;
-else if (SYNTHESIZED_WIRE_16)
-	iff_ALTERA_SYNTHESIZED1 <= SYNTHESIZED_WIRE_15;
+if (!SYNTHESIZED_WIRE_21)
+	begin
+	DFFE_instIFF2 <= 0;
+	end
+else
+if (ctl_iffx_we)
+	begin
+	DFFE_instIFF2 <= ctl_iffx_bit;
+	end
 end
 
 
-always@(SYNTHESIZED_WIRE_28 or SYNTHESIZED_WIRE_19 or ctl_iffx_we or ctl_iffx_bit)
+always@(posedge clk or negedge nreset)
 begin
-if (~SYNTHESIZED_WIRE_28)
-		SYNTHESIZED_WIRE_15 <= 1'b0;
-else if (~SYNTHESIZED_WIRE_19)
-		SYNTHESIZED_WIRE_15 <= 1'b1;
-else if (ctl_iffx_we)
-	SYNTHESIZED_WIRE_15 <= ctl_iffx_bit;
+if (!nreset)
+	begin
+	im1 <= 0;
+	end
+else
+if (ctl_im_we)
+	begin
+	im1 <= SYNTHESIZED_WIRE_19;
+	end
 end
 
 
-always@(SYNTHESIZED_WIRE_29 or SYNTHESIZED_WIRE_23 or SYNTHESIZED_WIRE_30 or SYNTHESIZED_WIRE_21)
+always@(posedge clk or negedge nreset)
 begin
-if (~SYNTHESIZED_WIRE_29)
-		im1 <= 1'b0;
-else if (~SYNTHESIZED_WIRE_23)
-		im1 <= 1'b1;
-else if (SYNTHESIZED_WIRE_30)
-	im1 <= SYNTHESIZED_WIRE_21;
+if (!nreset)
+	begin
+	im2 <= 0;
+	end
+else
+if (ctl_im_we)
+	begin
+	im2 <= SYNTHESIZED_WIRE_20;
+	end
 end
 
+assign	SYNTHESIZED_WIRE_3 =  ~in_intr_ALTERA_SYNTHESIZED;
 
-always@(SYNTHESIZED_WIRE_29 or SYNTHESIZED_WIRE_27 or SYNTHESIZED_WIRE_30 or SYNTHESIZED_WIRE_25)
-begin
-if (~SYNTHESIZED_WIRE_29)
-		im2 <= 1'b0;
-else if (~SYNTHESIZED_WIRE_27)
-		im2 <= 1'b1;
-else if (SYNTHESIZED_WIRE_30)
-	im2 <= SYNTHESIZED_WIRE_25;
-end
+assign	SYNTHESIZED_WIRE_11 =  ~in_intr_ALTERA_SYNTHESIZED;
 
+assign	SYNTHESIZED_WIRE_7 =  ~in_nmi_ALTERA_SYNTHESIZED;
+
+assign	SYNTHESIZED_WIRE_14 =  ~in_nmi_ALTERA_SYNTHESIZED;
 
 assign	iff1 = iff_ALTERA_SYNTHESIZED1;
 assign	in_nmi = in_nmi_ALTERA_SYNTHESIZED;

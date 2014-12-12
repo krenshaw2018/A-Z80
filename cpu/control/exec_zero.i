@@ -5,7 +5,6 @@ ctl_state_iy_set = 0;
 ctl_state_ixiy_clr = 0;
 ctl_state_ixiy_we = 0;
 ctl_state_halt_set = 0;
-ctl_state_halt_clr = 0;
 ctl_state_tbl_clr = 0;
 ctl_state_tbl_ed_set = 0;
 ctl_state_tbl_cb_set = 0;
@@ -21,6 +20,11 @@ ctl_no_ints = 0;
 
 // Module: control/ir.v
 ctl_ir_we = 0;
+
+// Module: control/memory_ifc.v
+ctl_mRead = 0;
+ctl_mWrite = 0;
+ctl_iorw = 0;
 
 // Module: alu/alu_control.v
 ctl_shift_en = 0;
@@ -69,11 +73,16 @@ ctl_flags_hf_cpl = 0;
 ctl_flags_use_cf2 = 0;
 ctl_flags_hf2_we = 0;
 ctl_flags_nf_clr = 0;
+ctl_alu_zero_16bit = 0;
 ctl_flags_cf2_sel = 0;
 
 // Module: registers/reg_file.v
 ctl_sw_4d = 0;
 ctl_sw_4u = 0;
+ctl_reg_in_hi = 0;
+ctl_reg_in_lo = 0;
+ctl_reg_out_lo = 0;
+ctl_reg_out_hi = 0;
 
 // Module: registers/reg_control.v
 ctl_reg_exx = 0;
@@ -88,10 +97,8 @@ ctl_reg_not_pc = 0;
 ctl_reg_sys_we_lo = 0;
 ctl_reg_sys_we_hi = 0;
 ctl_reg_sys_we = 0;
-ctl_reg_out_lo = 0;
 ctl_reg_gp_hilo = 0;
 ctl_reg_gp_sel = 0;
-ctl_reg_in = 0;
 ctl_reg_sys_hilo = 0;
 
 // Module: bus/address_latch.v
@@ -101,6 +108,8 @@ ctl_inc_zero = 0;
 ctl_al_we = 0;
 ctl_inc_limit6 = 0;
 ctl_bus_inc_oe = 0;
+ctl_apin_mux = 0;
+ctl_apin_mux2 = 0;
 
 // Module: bus/bus_control.v
 ctl_bus_ff_oe = 0;

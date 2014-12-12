@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,8 +13,8 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Thu Sep 18 21:15:28 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Fri Nov 07 10:28:48 2014"
 
 module reg_file(
 	reg_sel_sys_lo,
@@ -40,11 +40,11 @@ module reg_file(
 	reg_gp_we,
 	reg_sys_we_lo,
 	reg_sys_we_hi,
-	reg_in_lo,
-	reg_in_hi,
-	reg_out_lo,
-	reg_out_hi,
-	nclk,
+	ctl_reg_in_hi,
+	ctl_reg_in_lo,
+	ctl_reg_out_lo,
+	ctl_reg_out_hi,
+	clk,
 	db_hi_as,
 	db_hi_ds,
 	db_lo_as,
@@ -75,11 +75,11 @@ input wire	reg_sel_af;
 input wire	reg_gp_we;
 input wire	reg_sys_we_lo;
 input wire	reg_sys_we_hi;
-input wire	reg_in_lo;
-input wire	reg_in_hi;
-input wire	reg_out_lo;
-input wire	reg_out_hi;
-input wire	nclk;
+input wire	ctl_reg_in_hi;
+input wire	ctl_reg_in_lo;
+input wire	ctl_reg_out_lo;
+input wire	ctl_reg_out_hi;
+input wire	clk;
 inout wire	[7:0] db_hi_as;
 inout wire	[7:0] db_hi_ds;
 inout wire	[7:0] db_lo_as;
@@ -271,224 +271,224 @@ assign	SYNTHESIZED_WIRE_79 = reg_sel_gp_lo & reg_gp_we & reg_sel_sp;
 
 reg_latch	b2v_latch_af2_hi(
 	.oe(SYNTHESIZED_WIRE_28),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_29),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_af2_lo(
 	.oe(SYNTHESIZED_WIRE_30),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_31),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_af_hi(
 	.oe(SYNTHESIZED_WIRE_32),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_33),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_af_lo(
 	.oe(SYNTHESIZED_WIRE_34),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_35),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_bc2_hi(
 	.oe(SYNTHESIZED_WIRE_36),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_37),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_bc2_lo(
 	.oe(SYNTHESIZED_WIRE_38),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_39),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_bc_hi(
 	.oe(SYNTHESIZED_WIRE_40),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_41),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_bc_lo(
 	.oe(SYNTHESIZED_WIRE_42),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_43),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_de2_hi(
 	.oe(SYNTHESIZED_WIRE_44),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_45),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_de2_lo(
 	.oe(SYNTHESIZED_WIRE_46),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_47),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_de_hi(
 	.oe(SYNTHESIZED_WIRE_48),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_49),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_de_lo(
 	.oe(SYNTHESIZED_WIRE_50),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_51),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_hl2_hi(
 	.oe(SYNTHESIZED_WIRE_52),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_53),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_hl2_lo(
 	.oe(SYNTHESIZED_WIRE_54),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_55),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_hl_hi(
 	.oe(SYNTHESIZED_WIRE_56),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_57),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_hl_lo(
 	.oe(SYNTHESIZED_WIRE_58),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_59),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_ir_hi(
 	.oe(SYNTHESIZED_WIRE_60),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_61),
+	.clk(clk),
 	.db(db_hi_as)
 	);
 
 
 reg_latch	b2v_latch_ir_lo(
 	.oe(SYNTHESIZED_WIRE_62),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_63),
+	.clk(clk),
 	.db(db_lo_as)
 	);
 
 
 reg_latch	b2v_latch_ix_hi(
 	.oe(SYNTHESIZED_WIRE_64),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_65),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_ix_lo(
 	.oe(SYNTHESIZED_WIRE_66),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_67),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_iy_hi(
 	.oe(SYNTHESIZED_WIRE_68),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_69),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_iy_lo(
 	.oe(SYNTHESIZED_WIRE_70),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_71),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_pc_hi(
 	.oe(SYNTHESIZED_WIRE_72),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_73),
+	.clk(clk),
 	.db(db_hi_as)
 	);
 
 
 reg_latch	b2v_latch_pc_lo(
 	.oe(SYNTHESIZED_WIRE_74),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_75),
+	.clk(clk),
 	.db(db_lo_as)
 	);
 
 
 reg_latch	b2v_latch_sp_hi(
 	.oe(SYNTHESIZED_WIRE_76),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_77),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_sp_lo(
 	.oe(SYNTHESIZED_WIRE_78),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_79),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
 
 reg_latch	b2v_latch_wz_hi(
 	.oe(SYNTHESIZED_WIRE_80),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_81),
+	.clk(clk),
 	.db(gdfx_temp1)
 	);
 
 
 reg_latch	b2v_latch_wz_lo(
 	.oe(SYNTHESIZED_WIRE_82),
-	.nclk(nclk),
 	.we(SYNTHESIZED_WIRE_83),
+	.clk(clk),
 	.db(gdfx_temp0)
 	);
 
@@ -528,41 +528,41 @@ assign	db_hi_as[2] = ctl_sw_4d ? gdfx_temp1[2] : 1'bz;
 assign	db_hi_as[1] = ctl_sw_4d ? gdfx_temp1[1] : 1'bz;
 assign	db_hi_as[0] = ctl_sw_4d ? gdfx_temp1[0] : 1'bz;
 
-assign	db_lo_ds[7] = reg_out_lo ? gdfx_temp0[7] : 1'bz;
-assign	db_lo_ds[6] = reg_out_lo ? gdfx_temp0[6] : 1'bz;
-assign	db_lo_ds[5] = reg_out_lo ? gdfx_temp0[5] : 1'bz;
-assign	db_lo_ds[4] = reg_out_lo ? gdfx_temp0[4] : 1'bz;
-assign	db_lo_ds[3] = reg_out_lo ? gdfx_temp0[3] : 1'bz;
-assign	db_lo_ds[2] = reg_out_lo ? gdfx_temp0[2] : 1'bz;
-assign	db_lo_ds[1] = reg_out_lo ? gdfx_temp0[1] : 1'bz;
-assign	db_lo_ds[0] = reg_out_lo ? gdfx_temp0[0] : 1'bz;
+assign	db_lo_ds[7] = ctl_reg_out_lo ? gdfx_temp0[7] : 1'bz;
+assign	db_lo_ds[6] = ctl_reg_out_lo ? gdfx_temp0[6] : 1'bz;
+assign	db_lo_ds[5] = ctl_reg_out_lo ? gdfx_temp0[5] : 1'bz;
+assign	db_lo_ds[4] = ctl_reg_out_lo ? gdfx_temp0[4] : 1'bz;
+assign	db_lo_ds[3] = ctl_reg_out_lo ? gdfx_temp0[3] : 1'bz;
+assign	db_lo_ds[2] = ctl_reg_out_lo ? gdfx_temp0[2] : 1'bz;
+assign	db_lo_ds[1] = ctl_reg_out_lo ? gdfx_temp0[1] : 1'bz;
+assign	db_lo_ds[0] = ctl_reg_out_lo ? gdfx_temp0[0] : 1'bz;
 
-assign	gdfx_temp0[7] = reg_in_lo ? db_lo_ds[7] : 1'bz;
-assign	gdfx_temp0[6] = reg_in_lo ? db_lo_ds[6] : 1'bz;
-assign	gdfx_temp0[5] = reg_in_lo ? db_lo_ds[5] : 1'bz;
-assign	gdfx_temp0[4] = reg_in_lo ? db_lo_ds[4] : 1'bz;
-assign	gdfx_temp0[3] = reg_in_lo ? db_lo_ds[3] : 1'bz;
-assign	gdfx_temp0[2] = reg_in_lo ? db_lo_ds[2] : 1'bz;
-assign	gdfx_temp0[1] = reg_in_lo ? db_lo_ds[1] : 1'bz;
-assign	gdfx_temp0[0] = reg_in_lo ? db_lo_ds[0] : 1'bz;
+assign	gdfx_temp0[7] = ctl_reg_in_lo ? db_lo_ds[7] : 1'bz;
+assign	gdfx_temp0[6] = ctl_reg_in_lo ? db_lo_ds[6] : 1'bz;
+assign	gdfx_temp0[5] = ctl_reg_in_lo ? db_lo_ds[5] : 1'bz;
+assign	gdfx_temp0[4] = ctl_reg_in_lo ? db_lo_ds[4] : 1'bz;
+assign	gdfx_temp0[3] = ctl_reg_in_lo ? db_lo_ds[3] : 1'bz;
+assign	gdfx_temp0[2] = ctl_reg_in_lo ? db_lo_ds[2] : 1'bz;
+assign	gdfx_temp0[1] = ctl_reg_in_lo ? db_lo_ds[1] : 1'bz;
+assign	gdfx_temp0[0] = ctl_reg_in_lo ? db_lo_ds[0] : 1'bz;
 
-assign	db_hi_ds[7] = reg_out_hi ? gdfx_temp1[7] : 1'bz;
-assign	db_hi_ds[6] = reg_out_hi ? gdfx_temp1[6] : 1'bz;
-assign	db_hi_ds[5] = reg_out_hi ? gdfx_temp1[5] : 1'bz;
-assign	db_hi_ds[4] = reg_out_hi ? gdfx_temp1[4] : 1'bz;
-assign	db_hi_ds[3] = reg_out_hi ? gdfx_temp1[3] : 1'bz;
-assign	db_hi_ds[2] = reg_out_hi ? gdfx_temp1[2] : 1'bz;
-assign	db_hi_ds[1] = reg_out_hi ? gdfx_temp1[1] : 1'bz;
-assign	db_hi_ds[0] = reg_out_hi ? gdfx_temp1[0] : 1'bz;
+assign	db_hi_ds[7] = ctl_reg_out_hi ? gdfx_temp1[7] : 1'bz;
+assign	db_hi_ds[6] = ctl_reg_out_hi ? gdfx_temp1[6] : 1'bz;
+assign	db_hi_ds[5] = ctl_reg_out_hi ? gdfx_temp1[5] : 1'bz;
+assign	db_hi_ds[4] = ctl_reg_out_hi ? gdfx_temp1[4] : 1'bz;
+assign	db_hi_ds[3] = ctl_reg_out_hi ? gdfx_temp1[3] : 1'bz;
+assign	db_hi_ds[2] = ctl_reg_out_hi ? gdfx_temp1[2] : 1'bz;
+assign	db_hi_ds[1] = ctl_reg_out_hi ? gdfx_temp1[1] : 1'bz;
+assign	db_hi_ds[0] = ctl_reg_out_hi ? gdfx_temp1[0] : 1'bz;
 
-assign	gdfx_temp1[7] = reg_in_hi ? db_hi_ds[7] : 1'bz;
-assign	gdfx_temp1[6] = reg_in_hi ? db_hi_ds[6] : 1'bz;
-assign	gdfx_temp1[5] = reg_in_hi ? db_hi_ds[5] : 1'bz;
-assign	gdfx_temp1[4] = reg_in_hi ? db_hi_ds[4] : 1'bz;
-assign	gdfx_temp1[3] = reg_in_hi ? db_hi_ds[3] : 1'bz;
-assign	gdfx_temp1[2] = reg_in_hi ? db_hi_ds[2] : 1'bz;
-assign	gdfx_temp1[1] = reg_in_hi ? db_hi_ds[1] : 1'bz;
-assign	gdfx_temp1[0] = reg_in_hi ? db_hi_ds[0] : 1'bz;
+assign	gdfx_temp1[7] = ctl_reg_in_hi ? db_hi_ds[7] : 1'bz;
+assign	gdfx_temp1[6] = ctl_reg_in_hi ? db_hi_ds[6] : 1'bz;
+assign	gdfx_temp1[5] = ctl_reg_in_hi ? db_hi_ds[5] : 1'bz;
+assign	gdfx_temp1[4] = ctl_reg_in_hi ? db_hi_ds[4] : 1'bz;
+assign	gdfx_temp1[3] = ctl_reg_in_hi ? db_hi_ds[3] : 1'bz;
+assign	gdfx_temp1[2] = ctl_reg_in_hi ? db_hi_ds[2] : 1'bz;
+assign	gdfx_temp1[1] = ctl_reg_in_hi ? db_hi_ds[1] : 1'bz;
+assign	gdfx_temp1[0] = ctl_reg_in_hi ? db_hi_ds[0] : 1'bz;
 
 
 endmodule

@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,8 +13,8 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Wed Sep 24 09:21:22 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Tue Oct 21 20:41:52 2014"
 
 module alu_control(
 	alu_shift_db0,
@@ -40,7 +40,7 @@ module alu_control(
 	flags_hf2,
 	flags_hf,
 	ctl_66_oe,
-	nclk,
+	clk,
 	ctl_pf_sel,
 	op543,
 	alu_shift_in,
@@ -80,7 +80,7 @@ input wire	flags_cf_latch;
 input wire	flags_hf2;
 input wire	flags_hf;
 input wire	ctl_66_oe;
-input wire	nclk;
+input wire	clk;
 input wire	[1:0] ctl_pf_sel;
 input wire	[2:0] op543;
 output wire	alu_shift_in;
@@ -97,12 +97,13 @@ output wire	[7:0] db;
 
 wire	condition;
 wire	[7:0] out;
-wire	[2:0] sel;
+wire	[1:0] sel;
 wire	SYNTHESIZED_WIRE_0;
 wire	SYNTHESIZED_WIRE_1;
 wire	SYNTHESIZED_WIRE_2;
-wire	SYNTHESIZED_WIRE_23;
-wire	SYNTHESIZED_WIRE_24;
+reg	DFFE_latch_pf_tmp;
+wire	SYNTHESIZED_WIRE_20;
+wire	SYNTHESIZED_WIRE_21;
 wire	SYNTHESIZED_WIRE_7;
 wire	SYNTHESIZED_WIRE_8;
 wire	SYNTHESIZED_WIRE_9;
@@ -113,99 +114,95 @@ wire	SYNTHESIZED_WIRE_13;
 wire	SYNTHESIZED_WIRE_14;
 wire	SYNTHESIZED_WIRE_15;
 wire	SYNTHESIZED_WIRE_16;
-wire	SYNTHESIZED_WIRE_17;
+wire	SYNTHESIZED_WIRE_22;
 wire	SYNTHESIZED_WIRE_18;
-wire	SYNTHESIZED_WIRE_19;
-wire	SYNTHESIZED_WIRE_25;
-wire	SYNTHESIZED_WIRE_21;
 
 assign	alu_op_low = ctl_alu_op_low;
-assign	daa_cf_out = SYNTHESIZED_WIRE_24;
-assign	SYNTHESIZED_WIRE_25 = 0;
-assign	SYNTHESIZED_WIRE_21 = 1;
+assign	daa_cf_out = SYNTHESIZED_WIRE_21;
+assign	SYNTHESIZED_WIRE_22 = 0;
+assign	SYNTHESIZED_WIRE_18 = 1;
 
 
 
+assign	condition = SYNTHESIZED_WIRE_0 ^ SYNTHESIZED_WIRE_1;
 
 
-assign	db[7] = SYNTHESIZED_WIRE_0 ? out[7] : 1'bz;
-assign	db[6] = SYNTHESIZED_WIRE_0 ? out[6] : 1'bz;
-assign	db[5] = SYNTHESIZED_WIRE_0 ? out[5] : 1'bz;
-assign	db[4] = SYNTHESIZED_WIRE_0 ? out[4] : 1'bz;
-assign	db[3] = SYNTHESIZED_WIRE_0 ? out[3] : 1'bz;
-assign	db[2] = SYNTHESIZED_WIRE_0 ? out[2] : 1'bz;
-assign	db[1] = SYNTHESIZED_WIRE_0 ? out[1] : 1'bz;
-assign	db[0] = SYNTHESIZED_WIRE_0 ? out[0] : 1'bz;
+
+assign	db[7] = SYNTHESIZED_WIRE_2 ? out[7] : 1'bz;
+assign	db[6] = SYNTHESIZED_WIRE_2 ? out[6] : 1'bz;
+assign	db[5] = SYNTHESIZED_WIRE_2 ? out[5] : 1'bz;
+assign	db[4] = SYNTHESIZED_WIRE_2 ? out[4] : 1'bz;
+assign	db[3] = SYNTHESIZED_WIRE_2 ? out[3] : 1'bz;
+assign	db[2] = SYNTHESIZED_WIRE_2 ? out[2] : 1'bz;
+assign	db[1] = SYNTHESIZED_WIRE_2 ? out[1] : 1'bz;
+assign	db[0] = SYNTHESIZED_WIRE_2 ? out[0] : 1'bz;
 
 assign	alu_shift_right = ctl_shift_en & op543[0];
 
-assign	alu_parity_in = ctl_alu_op_low | SYNTHESIZED_WIRE_1;
+assign	alu_parity_in = ctl_alu_op_low | DFFE_latch_pf_tmp;
 
-assign	SYNTHESIZED_WIRE_0 = ctl_66_oe | ctl_daa_oe;
+assign	SYNTHESIZED_WIRE_2 = ctl_66_oe | ctl_daa_oe;
 
-assign	sel[2] = op543[2] & SYNTHESIZED_WIRE_2;
-
-assign	sel[0] = op543[0];
+assign	sel[0] = op543[1];
 
 
-assign	sel[1] = op543[1];
+assign	out[1] = SYNTHESIZED_WIRE_20;
 
 
-assign	out[1] = SYNTHESIZED_WIRE_23;
+assign	out[2] = SYNTHESIZED_WIRE_20;
 
 
-assign	out[2] = SYNTHESIZED_WIRE_23;
+assign	out[5] = SYNTHESIZED_WIRE_21;
 
 
-assign	out[5] = SYNTHESIZED_WIRE_24;
-
-
-assign	out[6] = SYNTHESIZED_WIRE_24;
+assign	out[6] = SYNTHESIZED_WIRE_21;
 
 
 assign	alu_shift_left = ctl_shift_en & SYNTHESIZED_WIRE_7;
 
-assign	SYNTHESIZED_WIRE_24 = ctl_66_oe | alu_high_gt_9 | flags_cf_latch | SYNTHESIZED_WIRE_8;
+assign	SYNTHESIZED_WIRE_21 = ctl_66_oe | alu_high_gt_9 | flags_cf_latch | SYNTHESIZED_WIRE_8;
 
 assign	SYNTHESIZED_WIRE_9 = flags_hf2 | alu_low_gt_9;
 
 assign	SYNTHESIZED_WIRE_8 = alu_low_gt_9 & alu_high_eq_9;
 
-assign	SYNTHESIZED_WIRE_23 = SYNTHESIZED_WIRE_9 | ctl_66_oe;
+assign	SYNTHESIZED_WIRE_20 = SYNTHESIZED_WIRE_9 | ctl_66_oe;
 
-assign	SYNTHESIZED_WIRE_11 = alu_shift_db0 & op543[0];
+assign	SYNTHESIZED_WIRE_0 =  ~op543[0];
 
-assign	SYNTHESIZED_WIRE_12 = alu_shift_db7 & SYNTHESIZED_WIRE_10;
+assign	sel[1] = op543[2] & SYNTHESIZED_WIRE_10;
 
-assign	shift_cf_out = SYNTHESIZED_WIRE_11 | SYNTHESIZED_WIRE_12;
+assign	SYNTHESIZED_WIRE_12 = alu_shift_db0 & op543[0];
 
-assign	SYNTHESIZED_WIRE_15 = ctl_alu_core_hf & flags_hf;
+assign	SYNTHESIZED_WIRE_13 = alu_shift_db7 & SYNTHESIZED_WIRE_11;
 
-assign	SYNTHESIZED_WIRE_14 = SYNTHESIZED_WIRE_13 & flags_cf;
+assign	shift_cf_out = SYNTHESIZED_WIRE_12 | SYNTHESIZED_WIRE_13;
 
-assign	alu_core_cf_in = SYNTHESIZED_WIRE_14 | SYNTHESIZED_WIRE_15;
+assign	SYNTHESIZED_WIRE_16 = ctl_alu_core_hf & flags_hf;
 
-assign	SYNTHESIZED_WIRE_13 =  ~ctl_alu_core_hf;
+assign	SYNTHESIZED_WIRE_15 = SYNTHESIZED_WIRE_14 & flags_cf;
+
+assign	alu_core_cf_in = SYNTHESIZED_WIRE_15 | SYNTHESIZED_WIRE_16;
+
+assign	SYNTHESIZED_WIRE_14 =  ~ctl_alu_core_hf;
 
 
-always@(ctl_eval_cond or condition)
+always@(posedge clk)
 begin
 if (ctl_eval_cond)
+	begin
 	flags_cond_true <= condition;
+	end
 end
 
 
-alu_mux_8	b2v_inst_cond_mux(
-	.in0(SYNTHESIZED_WIRE_16),
-	.in1(flags_zf),
-	.in2(SYNTHESIZED_WIRE_17),
-	.in3(flags_cf),
-	.in4(SYNTHESIZED_WIRE_18),
-	.in5(flags_pf),
-	.in6(SYNTHESIZED_WIRE_19),
-	.in7(flags_sf),
+alu_mux_4	b2v_inst_cond_mux(
+	.in0(flags_zf),
+	.in1(flags_cf),
+	.in2(flags_pf),
+	.in3(flags_sf),
 	.sel(sel),
-	.out(condition));
+	.out(SYNTHESIZED_WIRE_1));
 
 
 alu_mux_4	b2v_inst_pf_sel(
@@ -222,33 +219,27 @@ alu_mux_8	b2v_inst_shift_mux(
 	.in1(alu_shift_db0),
 	.in2(flags_cf_latch),
 	.in3(flags_cf_latch),
-	.in4(SYNTHESIZED_WIRE_25),
+	.in4(SYNTHESIZED_WIRE_22),
 	.in5(alu_shift_db7),
-	.in6(SYNTHESIZED_WIRE_21),
-	.in7(SYNTHESIZED_WIRE_25),
+	.in6(SYNTHESIZED_WIRE_18),
+	.in7(SYNTHESIZED_WIRE_22),
 	.sel(op543),
 	.out(alu_shift_in));
 
 
-alu_latch	b2v_latch_pf_tmp(
-	.D(alu_parity_out),
-	.ENA(ctl_alu_op_low),
-	.NCLK(nclk),
-	.Q(SYNTHESIZED_WIRE_1));
+always@(posedge clk)
+begin
+if (ctl_alu_op_low)
+	begin
+	DFFE_latch_pf_tmp <= alu_parity_out;
+	end
+end
 
 assign	SYNTHESIZED_WIRE_7 =  ~op543[0];
 
-assign	SYNTHESIZED_WIRE_10 =  ~op543[0];
+assign	SYNTHESIZED_WIRE_11 =  ~op543[0];
 
-assign	SYNTHESIZED_WIRE_16 =  ~flags_zf;
-
-assign	SYNTHESIZED_WIRE_17 =  ~flags_cf;
-
-assign	SYNTHESIZED_WIRE_18 =  ~flags_pf;
-
-assign	SYNTHESIZED_WIRE_19 =  ~flags_sf;
-
-assign	SYNTHESIZED_WIRE_2 =  ~ctl_cond_short;
+assign	SYNTHESIZED_WIRE_10 =  ~ctl_cond_short;
 
 
 assign	out[3] = 0;

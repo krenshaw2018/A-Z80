@@ -4,9 +4,11 @@
 *.rpt
 *.smsg
 *.summary
+*.ddb
 db/
 incremental_db/
 out/
+output_files/
 greybox_tmp/
 
 # Quartus workspace file: stores window position, dock state etc.

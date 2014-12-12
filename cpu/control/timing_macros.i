@@ -9,10 +9,7 @@
 // * A macro may span multiple lines, in which case use the '\' character after the name to
 //   continue on the next line.
 // * Multiline macros end when a line does not _start_ with a space character.
-// * Within each macro, two special tokens are recognized and substituted to:
-//   {M?}  - replaced with the current M cycle number
-//   {T?}  - replaced with the current T clock number
-// In addition, //-style comments are wrapped within /* ... */ if they don't start a line.
+// //-style comments are wrapped within /* ... */ if they don't start a line.
 //=========================================================================================
 
 //-----------------------------------------------------------------------------------------
@@ -32,7 +29,12 @@ fIOWrite        fIOWrite=1;
 1               validPLA=1;
 :nextM
 1               nextM=1;
+mr              nextM=1; ctl_mRead=1;
+mw              nextM=1; ctl_mWrite=1;
+ior             nextM=1; ctl_iorw=1;
+iow             nextM=1; ctl_iorw=1;
 CC              nextM=!flags_cond_true;
+INT             nextM=1; ctl_mRead=in_intr & im2;   // RST38 interrupt extension
 :setM1
 1               setM1=1;
 SS              setM1=!flags_cond_true;
@@ -40,7 +42,7 @@ CC              setM1=!flags_cond_true;
 ZF              setM1=flags_zf; // Used in DJNZ
 BR              setM1=nonRep | !repeat_en;
 BRZ             setM1=nonRep | !repeat_en | flags_zf;
-INT             setM1=!(in_intr & im2); // RST interrupt extension
+INT             setM1=!(in_intr & im2);             // RST38 interrupt extension
 
 //-----------------------------------------------------------------------------------------
 // Register file, address (downstream) endpoint
@@ -81,23 +83,24 @@ PC      ctl_reg_sys_we=1; ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b11; pc_inc=!(in_
 >       ctl_sw_4u=1;
 
 //-----------------------------------------------------------------------------------------
-// Controls the address latch incrementer and the address latch
+// Controls the address latch incrementer, the address latch and the address pin mux
 //-----------------------------------------------------------------------------------------
 :inc/dec
-+       ctl_inc_cy=pc_inc;                                  // Increment
--       ctl_inc_cy=pc_inc; ctl_inc_dec=1;                   // Decrement
-op3     ctl_inc_cy=pc_inc; ctl_inc_dec=op3;                 // Decrement if op3 is set; increment otherwise
++       ctl_inc_cy=pc_inc;                      // Increment
+-       ctl_inc_cy=pc_inc; ctl_inc_dec=1;       // Decrement
+op3     ctl_inc_cy=pc_inc; ctl_inc_dec=op3;     // Decrement if op3 is set; increment otherwise
 
 :A:latch
-W       ctl_al_we=1;                                        // Write a value from the register bus to the address latch
-R       ctl_bus_inc_oe=1;                                   // Output enable incrementer to the register bus
-L       ctl_bus_inc_oe=1; ctl_al_we=1;                      // Loop back the incrementer into the latch (flop)
+W       ctl_al_we=1;                            // Write a value from the register bus to the address latch
+R       ctl_bus_inc_oe=1;                       // Output enable incrementer to the register bus
+P       ctl_apin_mux=1;                         // Apin sourced from incrementer
+RL      ctl_bus_inc_oe=1; ctl_apin_mux2=1;      // Apin sourced from AL
 
 //-----------------------------------------------------------------------------------------
 // Register file, data (upstream) endpoint
 //-----------------------------------------------------------------------------------------
 :D:reg rd
-// General purpose registers
+//----- General purpose registers -----
 A       ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
 AF      ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b11;
 B       ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
@@ -109,31 +112,40 @@ r8 \    // r8 addressing does not allow reading F register (A and F are also ind
 r8'     ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0};// Read 8-bit GP register selected by op[2:0]
 rh      ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10;         // Read 8-bit GP register high byte
 rl      ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01;         // Read 8-bit GP register low byte
-// System registers
+//----- System registers -----
+WZ      ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_sw_4u=1;
 Z       ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1; // Selecting strictly Z
 I/R     ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4u=1; // Read either I or R based on op3 (0 or 1)
 PCh     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b10; ctl_sw_4u=1;
 PCl     ctl_reg_sel_pc=1; ctl_reg_sys_hilo=2'b01; ctl_sw_4u=1;
->l      ctl_reg_out_lo=1; // Pass only low 8-bit value out of the register file
 
 :D:reg wr
-?       ctl_reg_in=2'b11; // 16-bit register to be written is decided elsewhere
-// General purpose registers
-A       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-F       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11;
-B       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11;
-r8      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; ctl_reg_in=2'b11; // Write 8-bit GP register
-r8'     ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; ctl_reg_in=2'b11; // Write 8-bit GP register selected by op[2:0]
-rh      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; ctl_reg_in=2'b11; // Write 8-bit GP register high byte
-rl      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; ctl_reg_in=2'b11; // Write 8-bit GP register low byte
-// System registers
-I/R     ctl_reg_sys_we=1; ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4d=1; ctl_reg_in=2'b11; // Write either I or R based on op3 (0 or 1)
-WZ      ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11; ctl_reg_in=2'b11;
-// This strict selection is used in the (IX+d) state machine to be able to both write to W and output WZ to the address latch
-W       ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; // Selecting strictly W
-W?      ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; ctl_reg_in=2'b10; // Conditionally selecting strictly W
-Z       ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; ctl_reg_in=2'b01; // Selecting strictly Z
-<l      ctl_reg_in=2'b01; // Pass only low 8-bit value into the register file
+?       // Which register to be written is decided elsewhere
+//----- General purpose registers -----
+A       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b10;
+F       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_AF; ctl_reg_gp_hilo=2'b01;
+B       ctl_reg_gp_we=1; ctl_reg_gp_sel=`GP_REG_BC; ctl_reg_gp_hilo=2'b10;
+r8      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo={!rsel3,rsel3}; // Write 8-bit GP register
+r8'     ctl_reg_gp_we=1; ctl_reg_gp_sel=op21; ctl_reg_gp_hilo={!rsel0,rsel0}; // Write 8-bit GP register selected by op[2:0]
+rh      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b10; // Write 8-bit GP register high byte
+rl      ctl_reg_gp_we=1; ctl_reg_gp_sel=op54; ctl_reg_gp_hilo=2'b01; // Write 8-bit GP register low byte
+//----- System registers -----
+I/R     ctl_reg_sys_we=1; ctl_reg_sel_ir=1; ctl_reg_sys_hilo={!op3,op3}; ctl_sw_4d=1; // Write either I or R based on op3 (0 or 1)
+WZ      ctl_reg_sys_we=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo=2'b11;
+W       ctl_reg_sys_we_hi=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[1]=1; // Selecting only W
+W?      ctl_reg_sys_we_hi=flags_cond_true; ctl_reg_sel_wz=flags_cond_true; ctl_reg_sys_hilo[1]=1; // Conditionally selecting only W
+Z       ctl_reg_sys_we_lo=1; ctl_reg_sel_wz=1; ctl_reg_sys_hilo[0]=1; // Selecting only Z
+
+//-----------------------------------------------------------------------------------------
+// Controls the register file gate connecting it with the ALU and data bus
+//-----------------------------------------------------------------------------------------
+:Reg gate
+<       ctl_reg_in_hi=1; ctl_reg_in_lo=1;       // From the ALU side into the register file
+<l      ctl_reg_in_lo=1;                        // From the ALU side into the register file low byte only
+<h      ctl_reg_in_hi=1;                        // From the ALU side into the register file high byte only
+>       ctl_reg_out_hi=1; ctl_reg_out_lo=1;     // From the register file into the ALU
+>l      ctl_reg_out_lo=1;                       // From the register file into the ALU low byte only
+>h      ctl_reg_out_hi=1;                       // From the register file into the ALU high byte only
 
 //-----------------------------------------------------------------------------------------
 // Switches on the data bus for each direction (upstream, downstream)
@@ -271,12 +283,11 @@ V       ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_V;
 iff2    ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_IFF2;
 REP     ctl_flags_pf_we=1; ctl_pf_sel=`PFSEL_REP;
 ?
--
 :NF
 *       ctl_flags_nf_we=1;                      // Previous NF, to be used when loading FLAGT
 0       ctl_flags_nf_we=1; ctl_flags_nf_clr=1;
 1       ctl_flags_nf_we=1; ctl_flags_nf_set=1;
-S       ctl_flags_nf_we=1;                      // Sign bit, to be used with FLAGT source set to "bus"
+S       ctl_flags_nf_we=1;                      // Sign bit, to be used with FLAGT source set to "alu"
 ?
 :CF
 *       ctl_flags_cf_we=1;
@@ -322,11 +333,13 @@ NEG_OP2         ctl_alu_sel_op2_neg=1;
 ?NF_SUB         ctl_alu_sel_op2_neg=flags_nf; ctl_flags_cf_cpl=!flags_nf;
 
 // M1 opcode read cycle and the refresh register increment cycle
-// Write the opcode into the instruction register unless:
-// 1. We are in HALT mode: push NOP (0x00) on the bus instead
-// 2. We are in INTR mode (IM1 or IM2): push RST38 (0xFF) on the bus instead
-// 3. We are in NMI mode: push RST38 (0xFF) on the bus instead
-OpcodeIR        ctl_ir_we=T{T?}up; ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi;
+// Write opcode into the instruction register through internal db0 bus:
+OpcodeToIR      ctl_ir_we=1;
+// At the common instruction load M1/T3, override opcode byte when servicing interrupts:
+// 1. We are in HALT mode: push NOP (0x00) instead
+// 2. We are in INTR mode (IM1 or IM2): push RST38 (0xFF) instead
+// 3. We are in NMI mode: push RST38 (0xFF) instead
+OverrideIR      ctl_bus_zero_oe=in_halt; ctl_bus_ff_oe=(in_intr & (im1 | im2)) | in_nmi;
 
 // RST instruction uses opcode[5:3] to specify a vector and this control passes those 3 bits through
 MASK_543        ctl_sw_mask543_en=!((in_intr & im2) | in_nmi);
@@ -339,13 +352,14 @@ RST_NMI         ctl_sw_1d=!in_nmi; ctl_66_oe=in_nmi;
 // 1. IM1 mode, force 0xFF on the db0 bus
 // 2. Clear IFF1 and IFF2 (done by the intr logic on posedge of in_intr)
 RST_INT         ctl_bus_ff_oe=in_intr & im1;
-RETN            ctl_iff1_iff2=1;        // RETN copies IFF2 into IFF1 (restores it)
-NO_INTS         ctl_no_ints=1;          // Disable interrupt generation for this opcode (DI/EI/CB/ED/DD/FD)
+RETN            ctl_iff1_iff2=1;                // RETN copies IFF2 into IFF1
+NO_INTS         ctl_no_ints=1;                  // Disable interrupt generation for this opcode (DI/EI/CB/ED/DD/FD)
 
-EvalCond        ctl_eval_cond=1;        // Evaluate flags condition based on the opcode[5:3]
-CondShort       ctl_cond_short=1;       // M1/T3 only: force a short flags condition (SS)
-Limit6          ctl_inc_limit6=1;       // Limit the incrementer to 6 bits
-DAA             ctl_daa_oe=1;           // Write DAA correction factor to the bus
-NonRep          nonRep=1;               // Non-repeating block instruction
-WriteBC=1       ctl_repeat_we=1;        // Update repeating flag latch with BC=1 status
-NOT_PC!         ctl_reg_not_pc=1;       // For M1/T1 load from a register other than PC
+EvalCond        ctl_eval_cond=1;                // Evaluate flags condition based on the opcode[5:3]
+CondShort       ctl_cond_short=1;               // M1/T3 only: force a short flags condition (SS)
+Limit6          ctl_inc_limit6=1;               // Limit the incrementer to 6 bits
+DAA             ctl_daa_oe=1;                   // Write DAA correction factor to the bus
+ZERO_16BIT      ctl_alu_zero_16bit=1;           // 16-bit arithmetic operation uses ZF calculated over 2 bytes
+NonRep          nonRep=1;                       // Non-repeating block instruction
+WriteBC=1       ctl_repeat_we=1;                // Update repeating flag latch with BC=1 status
+NOT_PC!         ctl_reg_not_pc=1;               // For M1/T1 load from a register other than PC

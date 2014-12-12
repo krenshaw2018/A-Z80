@@ -1,4 +1,4 @@
-// Copyright (C) 1991-2011 Altera Corporation
+// Copyright (C) 1991-2013 Altera Corporation
 // Your use of Altera Corporation's design tools, logic functions 
 // and other software and tools, and its AMPP partner logic 
 // functions, and any output files from any of the foregoing 
@@ -13,17 +13,17 @@
 // applicable agreement for further details.
 
 // PROGRAM		"Quartus II 64-Bit"
-// VERSION		"Version 11.0 Build 208 07/03/2011 Service Pack 1 SJ Full Version"
-// CREATED		"Tue Aug 19 09:36:23 2014"
+// VERSION		"Version 13.0.1 Build 232 06/12/2013 Service Pack 1 SJ Web Edition"
+// CREATED		"Sun Nov 16 23:11:10 2014"
 
 module sequencer(
 	clk,
 	nextM,
 	setM1,
-	reset,
-	T2_en,
-	hold_clk1,
-	hold_clk2,
+	nreset,
+	hold_clk_iorq,
+	hold_clk_wait,
+	hold_clk_busrq,
 	M1,
 	M2,
 	M3,
@@ -35,17 +35,18 @@ module sequencer(
 	T3,
 	T4,
 	T5,
-	T6
+	T6,
+	timings_en
 );
 
 
 input wire	clk;
 input wire	nextM;
 input wire	setM1;
-input wire	reset;
-input wire	T2_en;
-input wire	hold_clk1;
-input wire	hold_clk2;
+input wire	nreset;
+input wire	hold_clk_iorq;
+input wire	hold_clk_wait;
+input wire	hold_clk_busrq;
 output wire	M1;
 output wire	M2;
 output wire	M3;
@@ -58,336 +59,241 @@ output wire	T3;
 output wire	T4;
 output wire	T5;
 output reg	T6;
+output wire	timings_en;
 
-reg	SYNTHESIZED_WIRE_67;
-reg	SYNTHESIZED_WIRE_68;
-reg	SYNTHESIZED_WIRE_1;
-reg	SYNTHESIZED_WIRE_69;
-wire	SYNTHESIZED_WIRE_70;
-reg	SYNTHESIZED_WIRE_71;
-wire	SYNTHESIZED_WIRE_72;
-reg	DFFE_instM2;
-reg	DFFE_instM3;
-reg	DFFE_instM4;
-reg	DFFE_instM5;
-wire	SYNTHESIZED_WIRE_73;
-reg	SYNTHESIZED_WIRE_74;
-reg	DFFE_instT3;
-reg	DFFE_instT4;
-reg	DFFE_instT5;
-wire	SYNTHESIZED_WIRE_75;
+wire	ena_M;
+wire	ena_T;
+reg	DFFE_M4_ff;
+wire	SYNTHESIZED_WIRE_20;
+reg	DFFE_M5_ff;
+reg	DFFE_T1_ff;
 wire	SYNTHESIZED_WIRE_21;
-wire	SYNTHESIZED_WIRE_25;
-wire	SYNTHESIZED_WIRE_29;
-wire	SYNTHESIZED_WIRE_33;
-wire	SYNTHESIZED_WIRE_37;
-wire	SYNTHESIZED_WIRE_76;
-wire	SYNTHESIZED_WIRE_45;
-wire	SYNTHESIZED_WIRE_49;
-wire	SYNTHESIZED_WIRE_53;
-wire	SYNTHESIZED_WIRE_57;
-wire	SYNTHESIZED_WIRE_61;
-wire	SYNTHESIZED_WIRE_63;
-wire	SYNTHESIZED_WIRE_77;
+reg	DFFE_T2_ff;
+reg	DFFE_T3_ff;
+reg	DFFE_T4_ff;
+reg	DFFE_T5_ff;
+reg	DFFE_M1_ff;
+reg	DFFE_M2_ff;
+reg	DFFE_M3_ff;
+wire	SYNTHESIZED_WIRE_10;
+wire	SYNTHESIZED_WIRE_11;
+wire	SYNTHESIZED_WIRE_12;
+wire	SYNTHESIZED_WIRE_13;
+wire	SYNTHESIZED_WIRE_14;
+wire	SYNTHESIZED_WIRE_15;
+wire	SYNTHESIZED_WIRE_16;
+wire	SYNTHESIZED_WIRE_17;
+wire	SYNTHESIZED_WIRE_18;
+wire	SYNTHESIZED_WIRE_19;
 
-assign	M2 = DFFE_instM2;
-assign	M3 = DFFE_instM3;
-assign	M4 = DFFE_instM4;
-assign	M5 = DFFE_instM5;
-assign	T3 = DFFE_instT3;
-assign	T4 = DFFE_instT4;
-assign	T5 = DFFE_instT5;
-assign	SYNTHESIZED_WIRE_75 = 1;
-
-
-
-assign	T2 = T2_en & SYNTHESIZED_WIRE_67;
-
-assign	SYNTHESIZED_WIRE_70 =  ~SYNTHESIZED_WIRE_68;
-
-assign	SYNTHESIZED_WIRE_72 =  ~reset;
-
-assign	SYNTHESIZED_WIRE_77 =  ~clk;
-
-assign	SYNTHESIZED_WIRE_76 =  ~SYNTHESIZED_WIRE_1;
-
-assign	SYNTHESIZED_WIRE_73 =  ~SYNTHESIZED_WIRE_69;
-
-assign	SYNTHESIZED_WIRE_21 = SYNTHESIZED_WIRE_70 & SYNTHESIZED_WIRE_71;
-
-assign	M1 = SYNTHESIZED_WIRE_71 & SYNTHESIZED_WIRE_72;
-
-assign	SYNTHESIZED_WIRE_25 = SYNTHESIZED_WIRE_70 & DFFE_instM2;
-
-assign	SYNTHESIZED_WIRE_29 = SYNTHESIZED_WIRE_70 & DFFE_instM3;
-
-assign	SYNTHESIZED_WIRE_33 = SYNTHESIZED_WIRE_70 & DFFE_instM4;
-
-assign	SYNTHESIZED_WIRE_37 = SYNTHESIZED_WIRE_70 & DFFE_instM5;
+assign	M1 = DFFE_M1_ff;
+assign	M2 = DFFE_M2_ff;
+assign	M3 = DFFE_M3_ff;
+assign	M4 = DFFE_M4_ff;
+assign	M5 = DFFE_M5_ff;
+assign	T1 = DFFE_T1_ff;
+assign	T2 = DFFE_T2_ff;
+assign	T3 = DFFE_T3_ff;
+assign	T4 = DFFE_T4_ff;
+assign	T5 = DFFE_T5_ff;
 
 
-assign	SYNTHESIZED_WIRE_45 = SYNTHESIZED_WIRE_73 & SYNTHESIZED_WIRE_74;
 
-assign	T1 = SYNTHESIZED_WIRE_72 & SYNTHESIZED_WIRE_74;
+assign	SYNTHESIZED_WIRE_13 = DFFE_M4_ff & SYNTHESIZED_WIRE_20;
 
-assign	SYNTHESIZED_WIRE_49 = SYNTHESIZED_WIRE_73 & SYNTHESIZED_WIRE_67;
+assign	SYNTHESIZED_WIRE_14 = DFFE_M5_ff & SYNTHESIZED_WIRE_20;
 
-assign	SYNTHESIZED_WIRE_53 = SYNTHESIZED_WIRE_73 & DFFE_instT3;
+assign	SYNTHESIZED_WIRE_15 = DFFE_T1_ff & SYNTHESIZED_WIRE_21;
 
-assign	SYNTHESIZED_WIRE_57 = SYNTHESIZED_WIRE_73 & DFFE_instT4;
+assign	SYNTHESIZED_WIRE_16 = DFFE_T2_ff & SYNTHESIZED_WIRE_21;
 
-assign	SYNTHESIZED_WIRE_61 = SYNTHESIZED_WIRE_73 & DFFE_instT5;
+assign	SYNTHESIZED_WIRE_17 = DFFE_T3_ff & SYNTHESIZED_WIRE_21;
 
-assign	SYNTHESIZED_WIRE_63 = hold_clk2 | hold_clk1;
+assign	SYNTHESIZED_WIRE_18 = DFFE_T4_ff & SYNTHESIZED_WIRE_21;
+
+assign	SYNTHESIZED_WIRE_19 = DFFE_T5_ff & SYNTHESIZED_WIRE_21;
+
+assign	SYNTHESIZED_WIRE_10 = DFFE_M1_ff & SYNTHESIZED_WIRE_20;
+
+assign	SYNTHESIZED_WIRE_11 = DFFE_M2_ff & SYNTHESIZED_WIRE_20;
+
+assign	SYNTHESIZED_WIRE_12 = DFFE_M3_ff & SYNTHESIZED_WIRE_20;
+
+assign	ena_T = ~(hold_clk_iorq | hold_clk_wait | hold_clk_busrq);
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_75 or negedge SYNTHESIZED_WIRE_72)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_75)
+if (!nreset)
 	begin
-	SYNTHESIZED_WIRE_71 <= 0;
+	DFFE_M1_ff <= 1;
 	end
 else
-if (!SYNTHESIZED_WIRE_72)
+if (ena_M)
 	begin
-	SYNTHESIZED_WIRE_71 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_69)
-	begin
-	SYNTHESIZED_WIRE_71 <= SYNTHESIZED_WIRE_68;
+	DFFE_M1_ff <= setM1;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instM2 <= 0;
+	DFFE_M2_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_M)
 	begin
-	DFFE_instM2 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_69)
-	begin
-	DFFE_instM2 <= SYNTHESIZED_WIRE_21;
+	DFFE_M2_ff <= SYNTHESIZED_WIRE_10;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instM3 <= 0;
+	DFFE_M3_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_M)
 	begin
-	DFFE_instM3 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_69)
-	begin
-	DFFE_instM3 <= SYNTHESIZED_WIRE_25;
+	DFFE_M3_ff <= SYNTHESIZED_WIRE_11;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instM4 <= 0;
+	DFFE_M4_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_M)
 	begin
-	DFFE_instM4 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_69)
-	begin
-	DFFE_instM4 <= SYNTHESIZED_WIRE_29;
+	DFFE_M4_ff <= SYNTHESIZED_WIRE_12;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instM5 <= 0;
+	DFFE_M5_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_M)
 	begin
-	DFFE_instM5 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_69)
-	begin
-	DFFE_instM5 <= SYNTHESIZED_WIRE_33;
+	DFFE_M5_ff <= SYNTHESIZED_WIRE_13;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
 	M6 <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_M)
 	begin
-	M6 <= 1;
+	M6 <= SYNTHESIZED_WIRE_14;
+	end
+end
+
+assign	SYNTHESIZED_WIRE_21 =  ~ena_M;
+
+assign	SYNTHESIZED_WIRE_20 =  ~setM1;
+
+
+always@(posedge clk or negedge nreset)
+begin
+if (!nreset)
+	begin
+	DFFE_T1_ff <= 1;
 	end
 else
-if (SYNTHESIZED_WIRE_69)
+if (ena_T)
 	begin
-	M6 <= SYNTHESIZED_WIRE_37;
+	DFFE_T1_ff <= ena_M;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_75 or negedge SYNTHESIZED_WIRE_72)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_75)
+if (!nreset)
 	begin
-	SYNTHESIZED_WIRE_74 <= 0;
+	DFFE_T2_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_72)
+if (ena_T)
 	begin
-	SYNTHESIZED_WIRE_74 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	SYNTHESIZED_WIRE_74 <= SYNTHESIZED_WIRE_69;
+	DFFE_T2_ff <= SYNTHESIZED_WIRE_15;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	SYNTHESIZED_WIRE_67 <= 0;
+	DFFE_T3_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_T)
 	begin
-	SYNTHESIZED_WIRE_67 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	SYNTHESIZED_WIRE_67 <= SYNTHESIZED_WIRE_45;
+	DFFE_T3_ff <= SYNTHESIZED_WIRE_16;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instT3 <= 0;
+	DFFE_T4_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_T)
 	begin
-	DFFE_instT3 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	DFFE_instT3 <= SYNTHESIZED_WIRE_49;
+	DFFE_T4_ff <= SYNTHESIZED_WIRE_17;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
-	DFFE_instT4 <= 0;
+	DFFE_T5_ff <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_T)
 	begin
-	DFFE_instT4 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	DFFE_instT4 <= SYNTHESIZED_WIRE_53;
+	DFFE_T5_ff <= SYNTHESIZED_WIRE_18;
 	end
 end
 
 
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
+always@(posedge clk or negedge nreset)
 begin
-if (!SYNTHESIZED_WIRE_72)
-	begin
-	DFFE_instT5 <= 0;
-	end
-else
-if (!SYNTHESIZED_WIRE_75)
-	begin
-	DFFE_instT5 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	DFFE_instT5 <= SYNTHESIZED_WIRE_57;
-	end
-end
-
-
-always@(posedge clk or negedge SYNTHESIZED_WIRE_72 or negedge SYNTHESIZED_WIRE_75)
-begin
-if (!SYNTHESIZED_WIRE_72)
+if (!nreset)
 	begin
 	T6 <= 0;
 	end
 else
-if (!SYNTHESIZED_WIRE_75)
+if (ena_T)
 	begin
-	T6 <= 1;
-	end
-else
-if (SYNTHESIZED_WIRE_76)
-	begin
-	T6 <= SYNTHESIZED_WIRE_61;
+	T6 <= SYNTHESIZED_WIRE_19;
 	end
 end
 
-
-always@(SYNTHESIZED_WIRE_77 or SYNTHESIZED_WIRE_63)
-begin
-if (SYNTHESIZED_WIRE_77)
-	SYNTHESIZED_WIRE_1 <= SYNTHESIZED_WIRE_63;
-end
-
-
-always@(SYNTHESIZED_WIRE_77 or setM1)
-begin
-if (SYNTHESIZED_WIRE_77)
-	SYNTHESIZED_WIRE_68 <= setM1;
-end
-
-
-always@(SYNTHESIZED_WIRE_77 or nextM)
-begin
-if (SYNTHESIZED_WIRE_77)
-	SYNTHESIZED_WIRE_69 <= nextM;
-end
-
+assign	ena_M = nextM;
+assign	timings_en = ena_T;
 
 endmodule
