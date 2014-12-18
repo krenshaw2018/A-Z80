@@ -1,14 +1,19 @@
+//==============================================================
 // Test complete ALU block
-
-// 5 MHz for a functional simulation (no delay timings)
+//==============================================================
 `timescale 100 ns/ 100 ns
 
 module test_alu;
 
+// ----------------- CLOCKS AND RESET -----------------
+// Define one full T-clock cycle delay
+`define T #2
+bit clk = 1;
+initial repeat (24) #1 clk = ~clk;
+
 // ------------------------ BUS LOGIC ------------------------
 // Bus control
 logic alu_oe;               // ALU unit output enable to the outside bus
-logic nclk;
 
 // Write to the ALU internal data buses
 logic alu_op1_oe;           // Enable writing by the OP1 latch
@@ -98,6 +103,7 @@ reg cf;                     // Carry flag
 reg pf;                     // Parity flag
 reg hf;                     // Half-carry flag
 
+// ----------------- TEST -------------------
 initial begin
     // Init / reset
     db_w = 8'h00;
@@ -133,42 +139,47 @@ initial begin
 
     //------------------------------------------------------------
     // Test loading to internal bus from the input shifter through the OP1 latch
-    #1  db_w = 8'h24;                   // High: 0010  Low: 0100
+    `T  db_w = 8'h24;                   // High: 0010  Low: 0100
         bus_sel = BUS_SHIFT;
-        alu_shift_right = 1;            // Enable shift and shift right
-        alu_shift_in = 1;               // left shift <- 1
+        alu_shift_right = 1;            // Enable shift and shift *right*
+        alu_shift_in = 1;               // shift in <- 1
         alu_op1_sel_bus = 1;            // Write into the OP1 latch
 
-    #1  db_w = 'z;
+    `T  db_w = 'z;
         alu_op1_sel_bus = 0;
         alu_shift_in = 0;
         bus_sel = BUS_OP1;              // Read back OP1 latch
         alu_shift_right = 0;
-        // Expected output on the external ALU bus : 0100 1001, 0x49
-    #1  // Reset
+        // Expected output on the external ALU bus : 1001 0010, 0x92
+    `T  assert(db==8'h92);
+        // Reset
         bus_sel = BUS_HIGHZ;
 
     //------------------------------------------------------------
     // Test loading to internal bus from the input bit selector through the OP2 latch
-    #1  db_w = 'z;                      // Not using external bus to load, but the bit-select
+    `T  db_w = 'z;                      // Not using external bus to load, but the bit-select
         bsel = 2'h3;                    // Bit 3:  0000 1000
         bus_sel = BUS_BS;
         alu_op2_sel_bus = 1;            // Write into the OP2 latch
 
-    #1  bsel = 2'h0;
+    `T  db_w = 'z;
         alu_op2_sel_bus = 0;
+        alu_shift_in = 0;
         bus_sel = BUS_OP2;
+        bsel = 2'h0;
         // Expected output on the external ALU bus : 0000 1000, 0x08
+    `T  assert(db==8'h08);
         // Reset
-    #1  bus_sel = BUS_HIGHZ;
+    `T  bus_sel = BUS_HIGHZ;
 
     //------------------------------------------------------------
     // Test the full adding function, ADD
-    #1  db_w = 8'h8C;                   // Operand 1:  8C
+    `T  db_w = 8'h8C;                   // Operand 1:  8C
         bus_sel = BUS_SHIFT;            // Shifter writes to internal bus
         alu_op1_sel_bus = 1;            // Write into the OP1 latch
 
-    #1  db_w = 8'h6D;                   // Operand 1:  6D
+    `T  db_w = 8'h68;                   // Operand 1:  68
+        alu_op_low = 1;                 // Perform the low nibble calculation
         alu_op1_sel_bus = 0;
         bus_sel = BUS_SHIFT;            // Shifter writes to internal bus
         alu_op2_sel_bus = 1;            // Write into the OP2 latch
@@ -179,23 +190,23 @@ initial begin
         alu_core_R = 0;
         alu_core_S = 0;
         alu_core_V = 0;
-        alu_op_low = 1;                 // Perform the low nibble calculation
         hf = alu_core_cf_out;           // Load the HF with the half-carry out
         pf = alu_parity_out;            // Load the PF with the parity of the nibble result
 
-    #1  db_w = 'z;
+    `T  db_w = 'z;
+        alu_op_low = 0;                 // Perform the high nibble calculation
         alu_op2_sel_bus = 0;
         alu_sel_op2_high = 1;           // ALU select high OP2 nibble
         alu_core_cf_in = 0;
-        alu_op_low = 0;
         alu_core_cf_in = hf;            // Carry in the half-carry
         alu_parity_in = pf;             // Parity in the parity of the low result nibble
         bus_sel = BUS_RES;              // ALU result latch writes to the bus
-        // Expected output on the external ALU bus : 8C + 6D = F9
-    #1  // Reset
+        // Expected output on the external ALU bus : 8C + 68 = F4
+    `T  assert(db==8'hF4);
+        // Reset
         bus_sel = BUS_HIGHZ;
 
-    #1  $display("End of test");
+    `T  $display("End of test");
 end
 
 //--------------------------------------------------------------
@@ -212,6 +223,7 @@ end
 //--------------------------------------------------------------
 // Instantiate ALU block and assign identical nets and variables
 //--------------------------------------------------------------
+
 alu alu_inst( .* );
 
 endmodule
